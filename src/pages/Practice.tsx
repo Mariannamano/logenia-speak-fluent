@@ -28,6 +28,7 @@ const Practice = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [initialCategory, setInitialCategory] = useState<string | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   
   // Extract category from URL query parameters
   useEffect(() => {
@@ -41,9 +42,20 @@ const Practice = () => {
   
   const handleRecordingComplete = async (audioBlob: Blob, transcript: string) => {
     console.log("Recording completed. Audio blob size:", audioBlob.size);
+    
+    if (audioBlob.size === 0) {
+      toast({
+        title: "Recording Error",
+        description: "No audio was recorded. Please check your microphone and try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setHasRecording(true);
     setCompleteTranscript(transcript);
     setIsAnalyzing(true);
+    setAnalysisError(null);
     
     try {
       // Toast notification to let user know analysis is happening
@@ -60,22 +72,33 @@ const Practice = () => {
         setCompleteTranscript(result.transcript);
       }
       
-      // Set the AI analysis results
-      setSpeechAnalysis(result.feedback);
-      
-      // Update filler word count from AI analysis
-      const totalFillerWords = result.feedback.fillerWords.reduce(
-        (sum, item) => sum + item.count, 0
-      );
-      setFillerWordCount(prev => prev + totalFillerWords);
-      
-      // Success notification
-      toast({
-        title: "Analysis complete",
-        description: "Your speech feedback is ready to review."
-      });
+      // Check for error information in the response
+      if (result.feedback.suggestions[0]?.startsWith("Error analyzing")) {
+        setAnalysisError(result.feedback.suggestions[0]);
+        toast({
+          title: "Analysis Issue",
+          description: "There was a problem analyzing your recording. You can try recording again.",
+          variant: "destructive"
+        });
+      } else {
+        // Set the AI analysis results
+        setSpeechAnalysis(result.feedback);
+        
+        // Update filler word count from AI analysis
+        const totalFillerWords = result.feedback.fillerWords.reduce(
+          (sum, item) => sum + item.count, 0
+        );
+        setFillerWordCount(prev => prev + totalFillerWords);
+        
+        // Success notification
+        toast({
+          title: "Analysis complete",
+          description: "Your speech feedback is ready to review."
+        });
+      }
     } catch (error) {
       console.error("Error analyzing recording:", error);
+      setAnalysisError(error instanceof Error ? error.message : "Unknown error");
       toast({
         title: "Analysis failed",
         description: "We couldn't analyze your recording. Please try again.",
@@ -107,6 +130,21 @@ const Practice = () => {
     }, 8000);
   };
   
+  // Check browser compatibility on page load
+  useEffect(() => {
+    // Check for WebSpeechAPI and mediaDevices
+    const supportsSpeechRecognition = 'webkitSpeechRecognition' in window;
+    const supportsMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    
+    if (!supportsSpeechRecognition || !supportsMediaDevices) {
+      toast({
+        title: "Browser Compatibility Issue",
+        description: "Your browser doesn't fully support speech recognition. For the best experience, use Chrome, Edge, or Safari.",
+        variant: "destructive"
+      });
+    }
+  }, []);
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -132,6 +170,19 @@ const Practice = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Error message if analysis failed */}
+          {analysisError && (
+            <Card className="mb-8 border-destructive">
+              <CardContent className="pt-6">
+                <h3 className="text-xl font-semibold mb-3 text-destructive">Analysis Error</h3>
+                <p className="text-base">{analysisError}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Try recording again with a clearer voice, or check your microphone settings.
+                </p>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Complete Transcript appears after recording */}
           {hasRecording && (

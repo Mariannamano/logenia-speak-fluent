@@ -105,12 +105,24 @@ export function useRecording({
     setAudioChunks([]);
     
     try {
-      // Start audio recording
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      // Start audio recording with improved settings
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      // Use a more compatible MIME type - audio/webm is well-supported
+      const recorder = new MediaRecorder(stream, { 
+        mimeType: 'audio/webm',
+        audioBitsPerSecond: 128000 // Set a reasonable bitrate
+      });
       
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          console.log("Recorded audio chunk of size:", event.data.size);
           audioChunksRef.current = [...audioChunksRef.current, event.data];
           setAudioChunks(prevChunks => [...prevChunks, event.data]);
         }
@@ -120,13 +132,19 @@ export function useRecording({
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         console.log("Recording stopped, chunks:", audioChunksRef.current.length, "blob size:", audioBlob.size);
         
-        if (onRecordingComplete) {
+        if (onRecordingComplete && audioBlob.size > 0) {
           onRecordingComplete(audioBlob, transcript);
+        } else if (audioBlob.size === 0) {
+          toast({
+            title: "Recording Error",
+            description: "No audio was recorded. Please check your microphone and try again.",
+            variant: "destructive"
+          });
         }
       };
       
-      // Request data every second
-      recorder.start(1000);
+      // Request data every 500ms for more frequent chunks
+      recorder.start(500);
       setMediaRecorder(recorder);
       setElapsedTime(0);
       setProgress(0);

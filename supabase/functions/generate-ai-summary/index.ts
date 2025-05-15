@@ -12,6 +12,10 @@ import OpenAI from "https://esm.sh/openai@4.17.0";
 // Get the API key from environment variables
 const apiKey = Deno.env.get("OPENAI_API_KEY");
 
+if (!apiKey) {
+  console.error("OPENAI_API_KEY is not set in environment variables");
+}
+
 // Initialize the OpenAI client
 const openai = new OpenAI({
   apiKey: apiKey,
@@ -22,29 +26,60 @@ serve(async (req) => {
     console.log("Function called with request");
     
     // Parse the request body
-    const { audioData, transcript } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (error) {
+      console.error("Error parsing request body:", error);
+      throw new Error("Invalid request body");
+    }
+
+    const { audioData, transcript } = requestBody;
 
     console.log("Received request with audioData length:", 
       audioData ? (typeof audioData === 'string' ? audioData.length : 'not a string') : 'no audio data');
     console.log("Received transcript:", transcript ? transcript.substring(0, 100) + "..." : 'no transcript');
 
+    if (!audioData || typeof audioData !== 'string' || audioData.length < 100) {
+      throw new Error("Invalid or missing audio data");
+    }
+
     // If we have audioData, use Whisper for transcription
-    let finalTranscript = transcript;
+    let finalTranscript = transcript || "";
     let whisperTranscript = null;
     
     try {
       if (audioData && audioData.length > 0) {
-        // Convert base64 to Uint8Array if necessary
-        const audioBytes = audioData.startsWith("data:audio")
-          ? Uint8Array.from(atob(audioData.split(",")[1]), (c) => c.charCodeAt(0))
-          : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
+        // Check if the audioData is a valid base64 string
+        if (!audioData.startsWith("data:audio") && !audioData.includes("base64")) {
+          throw new Error("Invalid audio data format");
+        }
+
+        // Convert base64 to Uint8Array
+        let audioBytes;
+        try {
+          audioBytes = audioData.startsWith("data:audio")
+            ? Uint8Array.from(atob(audioData.split(",")[1]), (c) => c.charCodeAt(0))
+            : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
+        } catch (error) {
+          console.error("Error converting base64 to bytes:", error);
+          throw new Error("Failed to process audio data");
+        }
 
         console.log("Converted audio bytes length:", audioBytes.length);
+
+        if (audioBytes.length === 0) {
+          throw new Error("Empty audio data after conversion");
+        }
 
         // Create file object for OpenAI
         const file = new File([audioBytes], "audio.webm", { type: "audio/webm" });
 
         console.log("Created file object with size:", file.size);
+
+        if (file.size === 0) {
+          throw new Error("Empty audio file created");
+        }
 
         // Use OpenAI's Whisper model for accurate transcription
         const transcription = await openai.audio.transcriptions.create({
@@ -143,22 +178,24 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error processing request:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: errorMessage,
         transcript: "",
         feedback: {
           fillerWords: [],
           clarity: 0,
           pace: "good",
           structure: 0,
-          suggestions: ["Error analyzing your speech. Please try again."],
-          summary: "There was an error analyzing your speech. Please try again."
+          suggestions: ["Error analyzing your speech: " + errorMessage + ". Please try again."],
+          summary: "There was an error analyzing your speech. Please try again with a clearer recording."
         }
       }),
       {
         headers: { "Content-Type": "application/json" },
-        status: 500,
+        status: 200, // Return 200 so frontend can handle it
       }
     );
   }

@@ -68,7 +68,7 @@ export function setupSpeechRecognition(): SpeechRecognition | null {
   return recognition;
 }
 
-// New function to analyze recording with AI
+// Improved function to analyze recording with AI
 export async function analyzeRecording(
   audioBlob: Blob,
   transcript: string
@@ -76,21 +76,35 @@ export async function analyzeRecording(
   try {
     console.log("AnalyzeRecording called with audioBlob size:", audioBlob.size, "and transcript:", transcript);
     
-    // Convert blob to base64
-    const reader = new FileReader();
-    const audioBase64Promise = new Promise<string>((resolve) => {
+    if (audioBlob.size === 0) {
+      throw new Error("Empty audio recording");
+    }
+    
+    // Convert blob to base64 with improved error handling
+    const audioBase64Promise = new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
           resolve(reader.result);
         } else {
-          resolve('');
+          reject(new Error("Failed to convert audio to base64"));
         }
       };
+      
+      reader.onerror = () => {
+        reject(new Error("FileReader error"));
+      };
+      
+      reader.readAsDataURL(audioBlob);
     });
     
-    reader.readAsDataURL(audioBlob);
     const audioBase64 = await audioBase64Promise;
     console.log("Converted audio to base64, length:", audioBase64.length);
+    
+    if (!audioBase64 || audioBase64.length < 100) {
+      throw new Error("Invalid audio data");
+    }
     
     // Call the Supabase Edge Function
     const functionUrl = import.meta.env.VITE_SUPABASE_FUNCTION_URL || 'http://localhost:54321/functions/v1/generate-ai-summary';
@@ -102,7 +116,8 @@ export async function analyzeRecording(
     }, {
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 60000 // 60 second timeout for long processing
     });
     
     console.log("Response from Supabase function:", response.data);
@@ -114,6 +129,12 @@ export async function analyzeRecording(
     return response.data;
   } catch (error) {
     console.error("Error analyzing recording:", error);
+    
+    // Provide more specific error information to help debugging
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error details:", errorMessage);
+    
+    // Return a more descriptive error message
     return {
       transcript,
       feedback: {
@@ -121,8 +142,8 @@ export async function analyzeRecording(
         clarity: 0,
         pace: "good",
         structure: 0,
-        suggestions: ["Could not analyze recording. Please try again."],
-        summary: "Error analyzing your speech. Please try again."
+        suggestions: [`Error analyzing recording: ${errorMessage}. Please try again.`],
+        summary: `There was an error analyzing your speech: ${errorMessage}. Please try recording again with a clearer voice.`
       }
     };
   }

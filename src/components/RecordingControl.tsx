@@ -2,6 +2,8 @@
 import ProgressBar from "./recording/ProgressBar";
 import RecordingButtons from "./recording/RecordingButtons";
 import { useRecording } from "@/hooks/use-recording";
+import { useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -23,6 +25,18 @@ const RecordingControl = ({
   onFeedbackUpdate,
   enableRealtimeFeedback = true
 }: RecordingControlProps) => {
+  // Check for browser compatibility
+  useEffect(() => {
+    // Check if audio recording is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Browser Compatibility Issue",
+        description: "Your browser doesn't support audio recording. Please use Chrome, Edge, or Safari.",
+        variant: "destructive"
+      });
+    }
+  }, []);
+
   // Use our custom recording hook
   const {
     transcript,
@@ -39,7 +53,15 @@ const RecordingControl = ({
     onRecordingComplete: (audioBlob: Blob, transcript: string) => {
       console.log("RecordingControl - Recording complete, audioBlob size:", audioBlob.size);
       if (onRecordingComplete) {
-        onRecordingComplete(audioBlob, transcript);
+        if (audioBlob.size > 0) {
+          onRecordingComplete(audioBlob, transcript);
+        } else {
+          toast({
+            title: "Recording Error",
+            description: "No audio was recorded. Please check your microphone and try again.",
+            variant: "destructive"
+          });
+        }
       }
     },
     enableRealtimeFeedback
