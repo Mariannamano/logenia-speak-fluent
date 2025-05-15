@@ -1,4 +1,3 @@
-
 import { Scenario } from "@/components/ScenarioSelector";
 
 export interface ScenarioCategory {
@@ -314,6 +313,111 @@ export const practiceCategories: ScenarioCategory[] = [
         description: "Deliver a brief, engaging introduction at a networking event",
         prompt: "You're asked to speak for 1 minute at a networking event: 'Tell us who you are and what excites you right now.' Make it engaging but filler-free — and end with confidence.",
         category: "Networking"
+      }
+    ]
+  },
+  {
+    id: "cross-cultural",
+    name: "Cross-Cultural Communication",
+    description: "Learn to adapt your communication style for international business contexts and avoid misunderstandings.",
+    scenarios: [
+      {
+        id: "international-meeting",
+        title: "International Team Meeting",
+        description: "Practice clear communication in a multinational team",
+        prompt: "You're leading a meeting with team members from different countries. Introduce the agenda and set expectations for participation.",
+        category: "International Business"
+      },
+      {
+        id: "cultural-norms",
+        title: "Explaining Cultural Norms",
+        description: "Discuss cultural differences in business communication",
+        prompt: "A colleague from another country asks about communication norms in your culture. Explain how directness, feedback, and disagreement are typically handled.",
+        category: "Cultural Exchange"
+      },
+      {
+        id: "negotiation-styles",
+        title: "Cross-Cultural Negotiation",
+        description: "Adapt your negotiation approach for international contexts",
+        prompt: "You're preparing for a negotiation with partners from a different culture. Explain your approach and how you'll adapt your communication style.",
+        category: "Negotiation"
+      },
+      {
+        id: "etiquette-explanation",
+        title: "Business Etiquette Explanation",
+        description: "Share business customs with international colleagues",
+        prompt: "New team members from abroad have joined your company. Explain some important business etiquette rules they should be aware of.",
+        category: "Business Etiquette"
+      }
+    ]
+  },
+  {
+    id: "casual",
+    name: "Casual Conversations",
+    description: "Practice everyday interactions to build confidence and fluency in informal settings.",
+    scenarios: [
+      {
+        id: "small-talk",
+        title: "Office Small Talk",
+        description: "Practice casual conversation with colleagues",
+        prompt: "You're chatting with a colleague by the coffee machine. Talk about your weekend or recent vacation without using filler words.",
+        category: "Workplace Social"
+      },
+      {
+        id: "networking-event",
+        title: "Networking Event Chat",
+        description: "Introduce yourself at an industry mixer",
+        prompt: "You've just met someone at an industry networking event. Introduce yourself and find common professional interests.",
+        category: "Networking"
+      },
+      {
+        id: "lunch-conversation",
+        title: "Lunch Break Discussion",
+        description: "Chat about current events or shared interests",
+        prompt: "You're having lunch with colleagues and the conversation turns to a recent news event or popular show. Share your thoughts clearly.",
+        category: "Social"
+      },
+      {
+        id: "catching-up",
+        title: "Catching Up with Colleagues",
+        description: "Reconnect with someone you haven't seen recently",
+        prompt: "You're running into a colleague you haven't seen in months. Catch them up on what you've been working on and ask about their projects.",
+        category: "Workplace Social"
+      }
+    ]
+  },
+  {
+    id: "startup",
+    name: "Startup-Specific Scenarios",
+    description: "Master the unique communication challenges of startup environments and pitch situations.",
+    scenarios: [
+      {
+        id: "elevator-pitch",
+        title: "Elevator Pitch",
+        description: "Deliver a concise pitch for your startup idea",
+        prompt: "You have 60 seconds in an elevator with a potential investor. Explain your startup idea clearly and convincingly.",
+        category: "Pitching"
+      },
+      {
+        id: "investor-meeting",
+        title: "Investor Q&A",
+        description: "Answer tough questions about your business model",
+        prompt: "An investor asks: 'What makes your solution different from existing competitors?' Respond clearly and confidently.",
+        category: "Fundraising"
+      },
+      {
+        id: "team-vision",
+        title: "Team Vision Communication",
+        description: "Share your vision with new team members",
+        prompt: "You're onboarding new hires to your startup. Explain the company vision and values in a way that's inspiring and clear.",
+        category: "Leadership"
+      },
+      {
+        id: "product-demo",
+        title: "Product Demo",
+        description: "Present your product clearly and persuasively",
+        prompt: "You're giving a demo of your product to potential customers. Walk through the key features and benefits without technical jargon.",
+        category: "Sales"
       }
     ]
   }

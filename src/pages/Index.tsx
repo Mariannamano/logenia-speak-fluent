@@ -1,56 +1,82 @@
 
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RoomCard from "@/components/rooms/RoomCard";
 import CharacterGuide from "@/components/guide/CharacterGuide";
-import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { toast } = useToast();
-  const [ambientSound, setAmbientSound] = useState(false);
-
-  const toggleAmbientSound = () => {
-    setAmbientSound(!ambientSound);
-    toast({
-      title: ambientSound ? "Ambient sounds turned off" : "Ambient sounds turned on",
-      description: ambientSound ? "Enjoy the silence!" : "Enjoy the cozy café atmosphere!",
-    });
-  };
-
   const featuredRooms = [
     {
-      id: "cafe-conversation",
-      title: "Café Conversation",
-      description: "Practice ordering food and drinks, and having casual conversations in a café setting.",
+      id: "professional",
+      title: "Work & Professional Communication",
+      description: "Practice workplace moments that require clear, confident speaking and reduce filler words.",
+      level: "Intermediate" as const,
+      category: "Professional",
+      duration: "10-15 min",
+      participants: 1,
+      imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    },
+    {
+      id: "storytelling",
+      title: "Self-Expression & Storytelling",
+      description: "Learn to share your personal stories and experiences with clarity and confidence.",
       level: "Beginner" as const,
-      category: "Daily Life",
+      category: "Personal",
       duration: "10-15 min",
       participants: 1,
       imageUrl: "https://images.unsplash.com/photo-1511920170033-f8396924c348?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
     },
     {
-      id: "travel-talk",
-      title: "Travel Talk",
-      description: "Learn how to navigate airports, book hotels, and ask for directions while traveling.",
+      id: "opinions",
+      title: "Opinions & Debate",
+      description: "Practice expressing your views clearly and respectfully while avoiding filler words.",
       level: "Intermediate" as const,
-      category: "Travel",
+      category: "Discussion",
       duration: "15-20 min",
       participants: 1,
       imageUrl: "https://images.unsplash.com/photo-1499591934245-40b55745b905?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
     },
     {
-      id: "business-meeting",
-      title: "Business Meeting",
-      description: "Practice professional vocabulary and expressions for business meetings and presentations.",
+      id: "presenting",
+      title: "Public Speaking & Presenting",
+      description: "Build confidence in formal presentation settings with clear, filler-free communication.",
       level: "Advanced" as const,
-      category: "Professional",
-      duration: "20-25 min",
-      participants: 2,
-      imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      category: "Presentation",
+      duration: "15-20 min",
+      participants: 1,
+      imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
     },
+    {
+      id: "cross-cultural",
+      title: "Cross-Cultural Communication",
+      description: "Learn to adapt your communication style for international business contexts.",
+      level: "Intermediate" as const,
+      category: "Cultural",
+      duration: "15-20 min",
+      participants: 1,
+      imageUrl: "https://images.unsplash.com/photo-1559132137-f168ae6b3d26?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    },
+    {
+      id: "casual",
+      title: "Casual Conversations",
+      description: "Perfect everyday interactions with natural, confident speech patterns.",
+      level: "Beginner" as const,
+      category: "Daily Life",
+      duration: "10-15 min",
+      participants: 1,
+      imageUrl: "https://images.unsplash.com/photo-1515169067868-5387ec356754?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    },
+    {
+      id: "startup",
+      title: "Startup-Specific Scenarios",
+      description: "Practice pitches, investor meetings, and team presentations for the startup context.",
+      level: "Advanced" as const,
+      category: "Business",
+      duration: "15-20 min",
+      participants: 1,
+      imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    }
   ];
 
   return (
@@ -63,54 +89,6 @@ const Index = () => {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1 space-y-6">
-                <div className="inline-block animate-fade-in">
-                  <Button
-                    variant="outline"
-                    onClick={toggleAmbientSound}
-                    className="gap-2 text-fluent-primary border-fluent-200 mb-4"
-                  >
-                    {ambientSound ? (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                          <line x1="23" y1="9" x2="17" y2="15" />
-                          <line x1="17" y1="9" x2="23" y2="15" />
-                        </svg>
-                        Turn off café sounds
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                        </svg>
-                        Turn on café sounds
-                      </>
-                    )}
-                  </Button>
-                </div>
-
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in" style={{ animationDelay: "0.1s" }}>
                   Practice languages in a <span className="text-fluent-primary">cozy</span> environment
                 </h1>
@@ -120,12 +98,12 @@ const Index = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                  <Button asChild size="lg" className="bg-fluent-primary hover:bg-fluent-600 text-white">
-                    <Link to="/practice">Enter Practice Room</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link to="/resources">Explore Resources</Link>
-                  </Button>
+                  <Link to="/practice" className="bg-fluent-primary hover:bg-fluent-600 text-white px-4 py-2 rounded-md font-medium text-center">
+                    Enter Practice Room
+                  </Link>
+                  <Link to="/resources" className="border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md font-medium text-center">
+                    Explore Resources
+                  </Link>
                 </div>
               </div>
 
@@ -281,24 +259,26 @@ const Index = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-2">Featured Practice Rooms</h2>
                 <p className="text-muted-foreground">
-                  Join these popular conversation rooms to start practicing
+                  Join these practice rooms to improve your speaking skills
                 </p>
               </div>
-              <Button variant="outline" className="hidden md:flex border-fluent-primary text-fluent-primary">
+              <Link to="/practice" className="hidden md:flex border-fluent-primary text-fluent-primary px-4 py-2 rounded-md border font-medium">
                 View All Rooms
-              </Button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredRooms.map((room) => (
-                <RoomCard key={room.id} {...room} />
+                <Link to={`/practice?category=${room.id}`} key={room.id}>
+                  <RoomCard {...room} />
+                </Link>
               ))}
             </div>
 
             <div className="mt-8 text-center md:hidden">
-              <Button variant="outline" className="border-fluent-primary text-fluent-primary">
+              <Link to="/practice" className="border-fluent-primary text-fluent-primary px-4 py-2 rounded-md border font-medium inline-block">
                 View All Rooms
-              </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -389,9 +369,9 @@ const Index = () => {
                   </div>
                 </div>
 
-                <Button asChild className="bg-fluent-primary hover:bg-fluent-600 text-white">
-                  <Link to="/practice">Start Practicing Now</Link>
-                </Button>
+                <Link to="/practice" className="bg-fluent-primary hover:bg-fluent-600 text-white px-4 py-2 rounded-md font-medium inline-block">
+                  Start Practicing Now
+                </Link>
               </div>
 
               <div className="lg:w-1/2">
@@ -414,9 +394,9 @@ const Index = () => {
                 <p className="text-lg opacity-90">
                   Join our cozy learning community today and take your language skills to the next level.
                 </p>
-                <Button asChild size="lg" className="bg-white hover:bg-fluent-50 text-fluent-primary">
-                  <Link to="/practice">Start Your First Lesson</Link>
-                </Button>
+                <Link to="/practice" className="bg-white hover:bg-fluent-50 text-fluent-primary px-6 py-3 rounded-md font-medium inline-block">
+                  Start Your First Lesson
+                </Link>
               </div>
             </div>
           </div>

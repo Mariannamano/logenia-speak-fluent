@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CultureTipCard from "@/components/CultureTipCard";
-import { BookOpen, Search, GlobeIcon, BookIcon, PlayIcon, Download, ExternalLink } from "lucide-react";
+import { BookOpen, Search, BookIcon, Download } from "lucide-react";
 
 const Resources = () => {
   return (
@@ -33,11 +33,9 @@ const Resources = () => {
           </div>
           
           <Tabs defaultValue="cultural-tips">
-            <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 mb-6">
               <TabsTrigger value="cultural-tips">Cultural Tips</TabsTrigger>
               <TabsTrigger value="phrase-guides">Phrase Guides</TabsTrigger>
-              <TabsTrigger value="articles">Articles & Guides</TabsTrigger>
-              <TabsTrigger value="videos">Video Lessons</TabsTrigger>
             </TabsList>
             
             <TabsContent value="cultural-tips" className="space-y-6">
@@ -255,98 +253,6 @@ const Resources = () => {
                 </Card>
               </div>
             </TabsContent>
-            
-            <TabsContent value="articles">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ResourceCard 
-                  title="Reducing Filler Words in Professional Speech"
-                  type="Article"
-                  author="Communication Academy"
-                  time="8 min read"
-                />
-                
-                <ResourceCard 
-                  title="English Idioms in Business Contexts"
-                  type="Guide"
-                  author="Business English Institute"
-                  time="15 min read"
-                />
-                
-                <ResourceCard 
-                  title="The Art of Clear Technical Explanations"
-                  type="Article"
-                  author="Tech Communication Blog"
-                  time="12 min read"
-                />
-                
-                <ResourceCard 
-                  title="How to Handle Difficult Questions in Meetings"
-                  type="Guide"
-                  author="Professional Speaking Institute"
-                  time="10 min read"
-                />
-                
-                <ResourceCard 
-                  title="Adapting Your Communication Style for Global Teams"
-                  type="Article"
-                  author="International Business Review"
-                  time="7 min read"
-                />
-                
-                <ResourceCard 
-                  title="Body Language in Virtual Meetings"
-                  type="Guide"
-                  author="Remote Work Experts"
-                  time="9 min read"
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="videos">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <VideoResourceCard 
-                  title="Mastering Business Small Talk"
-                  duration="14:25"
-                  instructor="Claire Johnson"
-                  level="Intermediate"
-                />
-                
-                <VideoResourceCard 
-                  title="How to Explain Complex Concepts Simply"
-                  duration="8:37"
-                  instructor="Dr. Michael Chen"
-                  level="Advanced"
-                />
-                
-                <VideoResourceCard 
-                  title="Presentation Opening Techniques"
-                  duration="11:52"
-                  instructor="Sarah Williams"
-                  level="Beginner"
-                />
-                
-                <VideoResourceCard 
-                  title="Improving Your Speech Clarity"
-                  duration="16:40"
-                  instructor="Robert Taylor"
-                  level="All Levels"
-                />
-                
-                <VideoResourceCard 
-                  title="Cultural Differences in Business Communication"
-                  duration="21:15"
-                  instructor="Elena Rodriguez"
-                  level="Intermediate"
-                />
-                
-                <VideoResourceCard 
-                  title="Reducing Nervousness in Speech"
-                  duration="9:48"
-                  instructor="James Wilson"
-                  level="Beginner"
-                />
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </main>
@@ -373,75 +279,6 @@ const PhraseCategory = ({ title, phrases }: PhraseCategoryProps) => {
         ))}
       </ul>
     </div>
-  );
-};
-
-interface ResourceCardProps {
-  title: string;
-  type: string;
-  author: string;
-  time: string;
-}
-
-const ResourceCard = ({ title, type, author, time }: ResourceCardProps) => {
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-all">
-      <div className="bg-muted h-36 flex items-center justify-center">
-        <BookOpen className="h-10 w-10 text-muted-foreground opacity-50" />
-      </div>
-      <CardContent className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium">{title}</h3>
-        </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex flex-col gap-1">
-            <span>{type} • {author}</span>
-            <span>{time}</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <ExternalLink className="h-4 w-4" />
-            <span className="sr-only">Open resource</span>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface VideoResourceCardProps {
-  title: string;
-  duration: string;
-  instructor: string;
-  level: string;
-}
-
-const VideoResourceCard = ({ title, duration, instructor, level }: VideoResourceCardProps) => {
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-all">
-      <div className="relative">
-        <div className="bg-muted h-40 flex items-center justify-center">
-          <PlayIcon className="h-10 w-10 text-muted-foreground opacity-50" />
-        </div>
-        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
-          {duration}
-        </div>
-      </div>
-      <CardContent className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium">{title}</h3>
-        </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex flex-col gap-1">
-            <span>{instructor}</span>
-            <span>Level: {level}</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <PlayIcon className="h-4 w-4" />
-            <span className="sr-only">Play video</span>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 
