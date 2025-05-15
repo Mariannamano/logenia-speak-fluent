@@ -105,7 +105,7 @@ export function useRecording({
     setAudioChunks([]);
     
     try {
-      // Start audio recording with improved settings
+      // Start audio recording with improved settings for compatibility
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -114,23 +114,29 @@ export function useRecording({
         } 
       });
       
-      // Use a more compatible MIME type - audio/webm is well-supported
+      // Use the most widely supported format
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') 
+        ? 'audio/webm' 
+        : 'audio/mp4';
+      
+      console.log(`Using MIME type: ${mimeType} for recording`);
+      
       const recorder = new MediaRecorder(stream, { 
-        mimeType: 'audio/webm',
+        mimeType,
         audioBitsPerSecond: 128000 // Set a reasonable bitrate
       });
       
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          console.log("Recorded audio chunk of size:", event.data.size);
+          console.log("Recorded audio chunk of size:", event.data.size, "type:", event.data.type);
           audioChunksRef.current = [...audioChunksRef.current, event.data];
           setAudioChunks(prevChunks => [...prevChunks, event.data]);
         }
       };
       
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        console.log("Recording stopped, chunks:", audioChunksRef.current.length, "blob size:", audioBlob.size);
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        console.log("Recording stopped, chunks:", audioChunksRef.current.length, "blob size:", audioBlob.size, "type:", audioBlob.type);
         
         if (onRecordingComplete && audioBlob.size > 0) {
           onRecordingComplete(audioBlob, transcript);

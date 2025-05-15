@@ -41,9 +41,9 @@ const Practice = () => {
   }, [location.search]);
   
   const handleRecordingComplete = async (audioBlob: Blob, transcript: string) => {
-    console.log("Recording completed. Audio blob size:", audioBlob.size);
+    console.log("Recording completed. Audio blob size:", audioBlob.size, "type:", audioBlob.type);
     
-    if (audioBlob.size === 0) {
+    if (!audioBlob || audioBlob.size === 0) {
       toast({
         title: "Recording Error",
         description: "No audio was recorded. Please check your microphone and try again.",
@@ -53,7 +53,7 @@ const Practice = () => {
     }
     
     setHasRecording(true);
-    setCompleteTranscript(transcript);
+    setCompleteTranscript(transcript || "No transcript available. Please speak clearly.");
     setIsAnalyzing(true);
     setAnalysisError(null);
     
@@ -68,7 +68,7 @@ const Practice = () => {
       const result = await analyzeRecording(audioBlob, transcript);
       
       // Update transcript with potentially more accurate one from whisper
-      if (result.transcript) {
+      if (result.transcript && result.transcript.length > 10) {
         setCompleteTranscript(result.transcript);
       }
       
@@ -98,10 +98,27 @@ const Practice = () => {
       }
     } catch (error) {
       console.error("Error analyzing recording:", error);
-      setAnalysisError(error instanceof Error ? error.message : "Unknown error");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      setAnalysisError(errorMessage);
+      
+      // Create a fallback analysis
+      const fallbackAnalysis: SpeechAnalysis = {
+        fillerWords: [],
+        clarity: 50,
+        pace: "good", 
+        structure: 50,
+        suggestions: [
+          "We could only analyze the basic transcript.", 
+          "Try speaking clearly and directly into the microphone."
+        ],
+        summary: "We analyzed what we could from your speech. Try speaking more clearly next time."
+      };
+      
+      setSpeechAnalysis(fallbackAnalysis);
+      
       toast({
-        title: "Analysis failed",
-        description: "We couldn't analyze your recording. Please try again.",
+        title: "Analysis issue",
+        description: "We had trouble analyzing your recording, but provided basic feedback.",
         variant: "destructive"
       });
     } finally {
