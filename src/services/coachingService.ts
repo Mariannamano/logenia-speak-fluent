@@ -74,6 +74,8 @@ export async function analyzeRecording(
   transcript: string
 ): Promise<{ transcript: string; feedback: SpeechAnalysis }> {
   try {
+    console.log("AnalyzeRecording called with audioBlob size:", audioBlob.size, "and transcript:", transcript);
+    
     // Convert blob to base64
     const reader = new FileReader();
     const audioBase64Promise = new Promise<string>((resolve) => {
@@ -88,14 +90,26 @@ export async function analyzeRecording(
     
     reader.readAsDataURL(audioBlob);
     const audioBase64 = await audioBase64Promise;
+    console.log("Converted audio to base64, length:", audioBase64.length);
     
     // Call the Supabase Edge Function
     const functionUrl = import.meta.env.VITE_SUPABASE_FUNCTION_URL || 'http://localhost:54321/functions/v1/generate-ai-summary';
+    console.log("Calling Supabase function at:", functionUrl);
     
     const response = await axios.post(functionUrl, {
       audioData: audioBase64,
       transcript
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
+    
+    console.log("Response from Supabase function:", response.data);
+    
+    if (!response.data || !response.data.feedback) {
+      throw new Error("Invalid response from Supabase function");
+    }
     
     return response.data;
   } catch (error) {

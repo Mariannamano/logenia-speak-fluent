@@ -14,7 +14,7 @@ interface FeedbackItem {
 }
 
 interface PracticeControlsProps {
-  onRecordingComplete: (audioBlob: Blob) => void;
+  onRecordingComplete: (audioBlob: Blob, transcript: string) => void;
   onTranscriptUpdate: (transcript: string) => void;
   onFeedbackUpdate: (feedback: FeedbackItem[]) => void;
   currentTranscript: string;
@@ -54,6 +54,11 @@ const PracticeControls = ({
     });
   };
 
+  const handleRecordingComplete = (audioBlob: Blob, transcript: string) => {
+    console.log("PracticeControls - Recording completed, forwarding to parent. Blob size:", audioBlob.size);
+    onRecordingComplete(audioBlob, transcript);
+  };
+
   return (
     <div className="space-y-4">
       {/* Scenario Selector */}
@@ -81,7 +86,7 @@ const PracticeControls = ({
           Start Speaking
         </Label>
         <RecordingControl 
-          onRecordingComplete={onRecordingComplete}
+          onRecordingComplete={handleRecordingComplete}
           onTranscriptUpdate={onTranscriptUpdate}
           onFeedbackUpdate={onFeedbackUpdate}
           enableRealtimeFeedback={enableRealtimeCoaching}

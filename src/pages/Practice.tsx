@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
 import PracticeControls from "@/components/practice/PracticeControls";
 import { analyzeRecording, SpeechAnalysis } from "@/services/coachingService";
-import { practiceCategories } from "@/data/practiceScenarios";
+import { toast } from "@/hooks/use-toast";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -40,12 +40,18 @@ const Practice = () => {
   }, [location.search]);
   
   const handleRecordingComplete = async (audioBlob: Blob, transcript: string) => {
-    console.log("Recording completed:", audioBlob);
+    console.log("Recording completed. Audio blob size:", audioBlob.size);
     setHasRecording(true);
     setCompleteTranscript(transcript);
     setIsAnalyzing(true);
     
     try {
+      // Toast notification to let user know analysis is happening
+      toast({
+        title: "Analyzing your speech",
+        description: "We're processing your recording to provide feedback..."
+      });
+      
       // Send recording for AI analysis
       const result = await analyzeRecording(audioBlob, transcript);
       
@@ -63,8 +69,18 @@ const Practice = () => {
       );
       setFillerWordCount(prev => prev + totalFillerWords);
       
+      // Success notification
+      toast({
+        title: "Analysis complete",
+        description: "Your speech feedback is ready to review."
+      });
     } catch (error) {
       console.error("Error analyzing recording:", error);
+      toast({
+        title: "Analysis failed",
+        description: "We couldn't analyze your recording. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -104,7 +120,7 @@ const Practice = () => {
                 <PracticeHeader fillerWordCount={fillerWordCount} />
                 
                 <PracticeControls 
-                  onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, currentTranscript)}
+                  onRecordingComplete={handleRecordingComplete}
                   onTranscriptUpdate={handleTranscriptUpdate}
                   onFeedbackUpdate={handleFeedbackUpdate}
                   currentTranscript={currentTranscript}
@@ -123,7 +139,7 @@ const Practice = () => {
               <CardContent className="pt-6">
                 <h3 className="text-xl font-semibold mb-3">Complete Transcript</h3>
                 <div className="p-4 bg-fluent-100 dark:bg-fluent-800/40 rounded-md text-lg border border-fluent-200 dark:border-fluent-700/50">
-                  {completeTranscript}
+                  {completeTranscript || "No transcript available"}
                 </div>
               </CardContent>
             </Card>

@@ -19,28 +19,75 @@ const openai = new OpenAI({
 
 serve(async (req) => {
   try {
+    console.log("Function called with request");
+    
     // Parse the request body
     const { audioData, transcript } = await req.json();
 
+    console.log("Received request with audioData length:", 
+      audioData ? (typeof audioData === 'string' ? audioData.length : 'not a string') : 'no audio data');
+    console.log("Received transcript:", transcript ? transcript.substring(0, 100) + "..." : 'no transcript');
+
     // If we have audioData, use Whisper for transcription
     let finalTranscript = transcript;
-    if (audioData) {
-      // Convert base64 to Uint8Array if necessary
-      const audioBytes = audioData.startsWith("data:audio")
-        ? Uint8Array.from(atob(audioData.split(",")[1]), (c) => c.charCodeAt(0))
-        : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
+    let whisperTranscript = null;
+    
+    try {
+      if (audioData && audioData.length > 0) {
+        // Convert base64 to Uint8Array if necessary
+        const audioBytes = audioData.startsWith("data:audio")
+          ? Uint8Array.from(atob(audioData.split(",")[1]), (c) => c.charCodeAt(0))
+          : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
 
-      // Create file object for OpenAI
-      const file = new File([audioBytes], "audio.webm", { type: "audio/webm" });
+        console.log("Converted audio bytes length:", audioBytes.length);
 
-      // Use OpenAI's Whisper model for accurate transcription
-      const transcription = await openai.audio.transcriptions.create({
-        file,
-        model: "whisper-1",
-      });
+        // Create file object for OpenAI
+        const file = new File([audioBytes], "audio.webm", { type: "audio/webm" });
 
-      finalTranscript = transcription.text;
+        console.log("Created file object with size:", file.size);
+
+        // Use OpenAI's Whisper model for accurate transcription
+        const transcription = await openai.audio.transcriptions.create({
+          file,
+          model: "whisper-1",
+        });
+
+        console.log("Got transcription from Whisper:", transcription.text.substring(0, 100) + "...");
+        whisperTranscript = transcription.text;
+        
+        // Use Whisper transcript if it's longer than the provided transcript
+        if (!finalTranscript || whisperTranscript.length > finalTranscript.length) {
+          finalTranscript = whisperTranscript;
+        }
+      }
+    } catch (whisperError) {
+      console.error("Error with Whisper transcription:", whisperError);
+      // Continue with the original transcript if Whisper fails
     }
+
+    // If we don't have any transcript, return an error
+    if (!finalTranscript || finalTranscript.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: "No transcript available for analysis",
+          transcript: "",
+          feedback: {
+            fillerWords: [],
+            clarity: 0,
+            pace: "good",
+            structure: 0,
+            suggestions: ["Could not analyze your speech. Please try again and speak clearly."],
+            summary: "No speech was detected. Please try speaking louder or check your microphone."
+          }
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 200, // Return 200 even for this case so the frontend can handle it
+        }
+      );
+    }
+
+    console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100) + "...");
 
     // Generate AI feedback on the transcript
     const feedbackResponse = await openai.chat.completions.create({
@@ -81,6 +128,7 @@ serve(async (req) => {
     });
 
     const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
+    console.log("Got feedback:", JSON.stringify(feedback).substring(0, 100) + "...");
 
     // Return the transcript and feedback
     return new Response(
@@ -96,7 +144,18 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        transcript: "",
+        feedback: {
+          fillerWords: [],
+          clarity: 0,
+          pace: "good",
+          structure: 0,
+          suggestions: ["Error analyzing your speech. Please try again."],
+          summary: "There was an error analyzing your speech. Please try again."
+        }
+      }),
       {
         headers: { "Content-Type": "application/json" },
         status: 500,

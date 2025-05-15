@@ -32,6 +32,7 @@ export function useRecording({
   
   const feedbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedTextRef = useRef<string>("");
+  const audioChunksRef = useRef<BlobPart[]>([]);
 
   const {
     transcript,
@@ -100,26 +101,33 @@ export function useRecording({
     setIsLoading(true);
     resetTranscript();
     lastProcessedTextRef.current = "";
+    audioChunksRef.current = [];
+    setAudioChunks([]);
     
     try {
       // Start audio recording
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       
       recorder.ondataavailable = (event) => {
-        setAudioChunks(chunks => [...chunks, event.data]);
+        if (event.data.size > 0) {
+          audioChunksRef.current = [...audioChunksRef.current, event.data];
+          setAudioChunks(prevChunks => [...prevChunks, event.data]);
+        }
       };
       
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        console.log("Recording stopped, chunks:", audioChunksRef.current.length, "blob size:", audioBlob.size);
+        
         if (onRecordingComplete) {
           onRecordingComplete(audioBlob, transcript);
         }
       };
       
-      recorder.start();
+      // Request data every second
+      recorder.start(1000);
       setMediaRecorder(recorder);
-      setAudioChunks([]);
       setElapsedTime(0);
       setProgress(0);
       

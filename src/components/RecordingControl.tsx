@@ -37,6 +37,7 @@ const RecordingControl = ({
     onTranscriptUpdate,
     onFeedbackUpdate,
     onRecordingComplete: (audioBlob: Blob, transcript: string) => {
+      console.log("RecordingControl - Recording complete, audioBlob size:", audioBlob.size);
       if (onRecordingComplete) {
         onRecordingComplete(audioBlob, transcript);
       }
