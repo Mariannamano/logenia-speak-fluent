@@ -7,7 +7,6 @@ import RealtimeFeedback from "@/components/RealtimeFeedback";
 import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
 import PracticeControls from "@/components/practice/PracticeControls";
-import PracticeSidebar from "@/components/practice/PracticeSidebar";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -53,38 +52,29 @@ const Practice = () => {
       <Header />
       
       <main className="flex-1 py-8">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column - Practice Area */}
-            <div className="flex-1">
-              <Card className="mb-8">
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <PracticeHeader fillerWordCount={fillerWordCount} />
-                    
-                    <PracticeControls 
-                      onRecordingComplete={handleRecordingComplete}
-                      onTranscriptUpdate={handleTranscriptUpdate}
-                      onFeedbackUpdate={handleFeedbackUpdate}
-                      currentTranscript={currentTranscript}
-                      enableRealtimeCoaching={enableRealtimeCoaching}
-                      setEnableRealtimeCoaching={setEnableRealtimeCoaching}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Feedback appears after recording */}
-              {hasRecording && (
-                <FeedbackPanel />
-              )}
-            </div>
-            
-            {/* Right Column - Tips */}
-            <div className="lg:w-1/3 space-y-6">
-              <PracticeSidebar />
-            </div>
-          </div>
+        <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+          {/* Main Practice Area - Now centered and wider */}
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                <PracticeHeader fillerWordCount={fillerWordCount} />
+                
+                <PracticeControls 
+                  onRecordingComplete={handleRecordingComplete}
+                  onTranscriptUpdate={handleTranscriptUpdate}
+                  onFeedbackUpdate={handleFeedbackUpdate}
+                  currentTranscript={currentTranscript}
+                  enableRealtimeCoaching={enableRealtimeCoaching}
+                  setEnableRealtimeCoaching={setEnableRealtimeCoaching}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Feedback appears after recording */}
+          {hasRecording && (
+            <FeedbackPanel />
+          )}
         </div>
       </main>
       
