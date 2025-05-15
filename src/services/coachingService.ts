@@ -1,7 +1,8 @@
 
 import axios from 'axios';
 
-const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:8000';
+// Using Vite's import.meta.env instead of process.env
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8000';
 
 interface FeedbackItem {
   type: "filler" | "followup";
