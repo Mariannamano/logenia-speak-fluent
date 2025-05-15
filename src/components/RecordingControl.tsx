@@ -2,9 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { Mic, Square, ArrowRight, Loader2 } from "lucide-react";
-import { setupSpeechRecognition, getRealtimeFeedback } from "@/services/coachingService";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { getRealtimeFeedback } from "@/services/coachingService";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -24,93 +25,71 @@ const RecordingControl = ({
   maxDuration = 60,
   onTranscriptUpdate,
   onFeedbackUpdate,
-  enableRealtimeFeedback = false
+  enableRealtimeFeedback = true
 }: RecordingControlProps) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<BlobPart[]>([]);
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [transcript, setTranscript] = useState("");
   
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const feedbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedTextRef = useRef<string>("");
 
-  // Track WebSpeech recognition session
-  useEffect(() => {
-    if (isRecording && enableRealtimeFeedback) {
-      recognitionRef.current = setupSpeechRecognition();
-      
-      if (recognitionRef.current) {
-        recognitionRef.current.onresult = (event) => {
-          let interimTranscript = '';
-          let finalTranscript = '';
-          
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
-            } else {
-              interimTranscript += event.results[i][0].transcript;
-            }
-          }
-          
-          const currentTranscript = finalTranscript + ' ' + interimTranscript;
-          setTranscript(prevTranscript => prevTranscript + ' ' + finalTranscript);
-          
-          if (onTranscriptUpdate) {
-            onTranscriptUpdate(currentTranscript);
-          }
-        };
-        
-        recognitionRef.current.onerror = (event) => {
-          console.error("Speech recognition error:", event.error);
-          toast.error("Speech recognition error. Please try again.");
-        };
-        
-        recognitionRef.current.start();
-        
-        // Set up interval to process feedback every 5 seconds
-        feedbackIntervalRef.current = setInterval(async () => {
-          // Only process if we have new content
-          if (transcript && transcript !== lastProcessedTextRef.current) {
-            const newContent = transcript.substring(lastProcessedTextRef.current.length).trim();
-            if (newContent.split(' ').length > 5) { // Only process if we have enough new words
-              const feedback = await getRealtimeFeedback(newContent);
-              lastProcessedTextRef.current = transcript;
-              
-              if (onFeedbackUpdate && feedback.length > 0) {
-                onFeedbackUpdate(feedback);
-              }
-            }
-          }
-        }, 5000); // Process every 5 seconds
+  // Use our custom speech recognition hook
+  const {
+    transcript,
+    isListening,
+    startListening,
+    stopListening,
+    resetTranscript
+  } = useSpeechRecognition({
+    onTranscriptChange: (newTranscript) => {
+      if (onTranscriptUpdate) {
+        onTranscriptUpdate(newTranscript);
       }
+    }
+  });
+
+  // Process feedback at intervals when recording
+  useEffect(() => {
+    if (isListening && enableRealtimeFeedback) {
+      // Set up interval to process feedback every 3 seconds
+      feedbackIntervalRef.current = setInterval(async () => {
+        // Only process if we have new content
+        if (transcript && transcript !== lastProcessedTextRef.current) {
+          const newContent = transcript.substring(lastProcessedTextRef.current.length).trim();
+          if (newContent.split(' ').length > 3) { // Only process if we have enough new words
+            const feedback = await getRealtimeFeedback(newContent);
+            lastProcessedTextRef.current = transcript;
+            
+            if (onFeedbackUpdate && feedback.length > 0) {
+              onFeedbackUpdate(feedback);
+            }
+          }
+        }
+      }, 3000); // Process every 3 seconds
     }
     
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
       if (feedbackIntervalRef.current) {
         clearInterval(feedbackIntervalRef.current);
       }
     };
-  }, [isRecording, enableRealtimeFeedback, onTranscriptUpdate, onFeedbackUpdate, transcript]);
+  }, [isListening, enableRealtimeFeedback, onFeedbackUpdate, transcript]);
 
+  // Track recording time
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isRecording && !isPaused) {
+    if (isListening) {
       interval = setInterval(() => {
         setElapsedTime(prev => {
           const newTime = prev + 1;
           setProgress((newTime / maxDuration) * 100);
           
           if (newTime >= maxDuration) {
-            stopRecording();
+            handleStopRecording();
           }
           
           return newTime;
@@ -119,14 +98,15 @@ const RecordingControl = ({
     }
     
     return () => clearInterval(interval);
-  }, [isRecording, isPaused, maxDuration]);
+  }, [isListening, maxDuration]);
 
-  const startRecording = async () => {
+  const handleStartRecording = async () => {
     setIsLoading(true);
-    setTranscript("");
+    resetTranscript();
     lastProcessedTextRef.current = "";
     
     try {
+      // Start audio recording
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       
@@ -143,39 +123,48 @@ const RecordingControl = ({
       
       recorder.start();
       setMediaRecorder(recorder);
-      setIsRecording(true);
       setAudioChunks([]);
       setElapsedTime(0);
       setProgress(0);
-      toast.success("Recording started");
+      
+      // Start speech recognition
+      const started = startListening();
+      if (started) {
+        toast({
+          title: "Recording started",
+          description: "Speak clearly and we'll detect any filler words you use."
+        });
+      }
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      toast.error("Could not access microphone. Please check permissions.");
+      toast({
+        title: "Microphone Error",
+        description: "Could not access microphone. Please check permissions.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const stopRecording = () => {
+  const handleStopRecording = () => {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       mediaRecorder.stop();
       // Stop all audio tracks
       mediaRecorder.stream.getTracks().forEach(track => track.stop());
-      
-      // Stop speech recognition if active
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      
-      // Clear feedback interval
-      if (feedbackIntervalRef.current) {
-        clearInterval(feedbackIntervalRef.current);
-      }
-      
-      setIsRecording(false);
-      setIsPaused(false);
-      toast.success("Recording completed!");
     }
+    
+    stopListening();
+    
+    // Clear feedback interval
+    if (feedbackIntervalRef.current) {
+      clearInterval(feedbackIntervalRef.current);
+    }
+    
+    toast({
+      title: "Recording completed",
+      description: "Your speech has been analyzed for filler words."
+    });
   };
 
   const formatTime = (seconds: number) => {
@@ -188,7 +177,7 @@ const RecordingControl = ({
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">
-          {isRecording ? 'Recording in progress' : 'Ready to record'}
+          {isListening ? 'Listening for filler words...' : 'Ready to detect filler words'}
         </div>
         <div className="text-sm">
           {formatTime(elapsedTime)} / {formatTime(maxDuration)}
@@ -198,9 +187,9 @@ const RecordingControl = ({
       <Progress value={progress} className="h-2" />
       
       <div className="flex justify-center gap-4">
-        {!isRecording ? (
+        {!isListening ? (
           <Button 
-            onClick={startRecording} 
+            onClick={handleStartRecording} 
             disabled={isLoading}
             size="lg"
             className="bg-logenia-500 hover:bg-logenia-600 px-8"
@@ -210,12 +199,12 @@ const RecordingControl = ({
             ) : (
               <Mic className="h-5 w-5 mr-2" />
             )}
-            Start Recording
+            Start Speaking
           </Button>
         ) : (
           <>
             <Button 
-              onClick={stopRecording}
+              onClick={handleStopRecording}
               variant="destructive"
               size="lg"
             >
@@ -223,7 +212,7 @@ const RecordingControl = ({
               Stop
             </Button>
             <Button 
-              onClick={stopRecording} 
+              onClick={handleStopRecording} 
               size="lg"
               className="bg-logenia-500 hover:bg-logenia-600"
             >

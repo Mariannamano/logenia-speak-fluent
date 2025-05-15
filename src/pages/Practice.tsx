@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RecordingControl from "@/components/RecordingControl";
@@ -8,12 +9,9 @@ import RealtimeFeedback from "@/components/RealtimeFeedback";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Clock, Users, Book, MicIcon, GlobeIcon, Info, PlayIcon } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Mic, Info, Book } from "lucide-react";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -26,11 +24,11 @@ const Practice = () => {
   const [realtimeFeedback, setRealtimeFeedback] = useState<FeedbackItem[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [enableRealtimeCoaching, setEnableRealtimeCoaching] = useState(true);
+  const [fillerWordCount, setFillerWordCount] = useState(0);
   
   const handleRecordingComplete = (audioBlob: Blob) => {
     console.log("Recording completed:", audioBlob);
     setHasRecording(true);
-    // In a real app, we would send this to a server for processing
   };
   
   const handleTranscriptUpdate = (transcript: string) => {
@@ -39,13 +37,19 @@ const Practice = () => {
   };
   
   const handleFeedbackUpdate = (feedback: FeedbackItem[]) => {
+    // Count filler word feedback items
+    const newFillerWords = feedback.filter(item => item.type === "filler").length;
+    if (newFillerWords > 0) {
+      setFillerWordCount(prev => prev + newFillerWords);
+    }
+    
     setRealtimeFeedback(feedback);
     setShowFeedback(true);
     
-    // Hide feedback after 10 seconds
+    // Hide feedback after 8 seconds
     setTimeout(() => {
       setShowFeedback(false);
-    }, 10000);
+    }, 8000);
   };
   
   return (
@@ -62,56 +66,29 @@ const Practice = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        Business Meeting Introduction
+                        Filler Word Reduction Training
                         <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          Beginner
+                          Speech Clarity
                         </Badge>
                       </CardTitle>
                       <CardDescription>
-                        Practice introducing yourself and your role in a professional meeting context.
+                        Practice speaking while the app detects your filler words in real-time and helps you improve.
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-3 mb-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>5-10 min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3.5 w-3.5" />
-                      <span>Solo Practice</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <GlobeIcon className="h-3.5 w-3.5" />
-                      <span>Global Business Context</span>
-                    </div>
-                  </div>
-                  
                   <div className="space-y-4">
                     <div>
                       <Label className="flex items-center gap-2">
                         <Book className="h-4 w-4" />
-                        Scenario
+                        How It Works
                       </Label>
                       <div className="mt-2 bg-muted p-4 rounded-md text-sm">
-                        You are attending an international business meeting with new clients from different countries. 
-                        You need to introduce yourself, your role in the company, and briefly explain what your 
-                        company does. Keep your introduction professional, clear, and concise.
+                        <p>Start speaking and we'll detect filler words like "um", "uh", "like", etc. You'll get real-time 
+                        feedback to help you become aware of these words and suggestions for improving your speech clarity.</p>
+                        <p className="mt-2">Current filler word count: <span className="font-bold">{fillerWordCount}</span></p>
                       </div>
-                    </div>
-                    
-                    <div>
-                      <Label>Sample Script (Optional)</Label>
-                      <Textarea 
-                        className="mt-2"
-                        placeholder="Hello everyone, I'm [Your Name]..."
-                        rows={4}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        You can use this as a starting point or create your own introduction.
-                      </p>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -127,8 +104,8 @@ const Practice = () => {
                     
                     <div className="border-t pt-4">
                       <Label className="mb-2 flex items-center gap-2">
-                        <MicIcon className="h-4 w-4" />
-                        Recording
+                        <Mic className="h-4 w-4" />
+                        Start Speaking
                       </Label>
                       <RecordingControl 
                         onRecordingComplete={handleRecordingComplete}
@@ -155,122 +132,81 @@ const Practice = () => {
               )}
             </div>
             
-            {/* Right Column - Context and Tips */}
+            {/* Right Column - Tips */}
             <div className="lg:w-1/3 space-y-6">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Info className="h-4 w-4" />
-                    Practice Settings
+                    Tips to Reduce Filler Words
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="context">Cultural Context</Label>
-                    <Select defaultValue="global">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select context" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="global">Global (General)</SelectItem>
-                        <SelectItem value="us">United States</SelectItem>
-                        <SelectItem value="eu">European Union</SelectItem>
-                        <SelectItem value="jp">Japan</SelectItem>
-                        <SelectItem value="cn">China</SelectItem>
-                        <SelectItem value="in">India</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="focus">Feedback Focus</Label>
-                    <Select defaultValue="all">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select focus areas" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Areas</SelectItem>
-                        <SelectItem value="pronunciation">Pronunciation</SelectItem>
-                        <SelectItem value="filler">Filler Words</SelectItem>
-                        <SelectItem value="pacing">Pacing & Rhythm</SelectItem>
-                        <SelectItem value="structure">Sentence Structure</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <Button className="w-full bg-logenia-500 hover:bg-logenia-600">
-                    Apply Settings
-                  </Button>
+                  <Tabs defaultValue="tips">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="tips">Tips</TabsTrigger>
+                      <TabsTrigger value="common">Common Fillers</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="tips" className="space-y-4 mt-4">
+                      <CultureTipCard
+                        region="Speech Clarity"
+                        title="Reducing Filler Words"
+                        description="How to speak more clearly and confidently."
+                        doTips={[
+                          "Pause instead of using fillers - silence is powerful",
+                          "Practice speaking more slowly and deliberately",
+                          "Record yourself to become aware of your speech patterns"
+                        ]}
+                        dontTips={[
+                          "Rush your speech when feeling nervous",
+                          "Focus too much on fillers during important conversations",
+                          "Be too hard on yourself - this takes practice"
+                        ]}
+                      />
+                      
+                      <CultureTipCard
+                        region="Professional Speaking"
+                        title="Confident Communication"
+                        description="Techniques for authoritative speaking."
+                        doTips={[
+                          "Prepare key points before important conversations",
+                          "Take a deep breath before responding to questions",
+                          "Use purposeful pauses instead of fillers"
+                        ]}
+                        dontTips={[
+                          "Fill silence with unnecessary words",
+                          "Speak too quickly when nervous",
+                          "Apologize repeatedly for verbal mistakes"
+                        ]}
+                      />
+                    </TabsContent>
+                    <TabsContent value="common">
+                      <div className="space-y-4 mt-4">
+                        <div className="border rounded-lg p-4">
+                          <h3 className="font-medium mb-2">Common Filler Words to Avoid</h3>
+                          <ul className="list-disc pl-5 space-y-1 text-sm">
+                            <li>"Um" and "Uh" - The most common fillers</li>
+                            <li>"Like" - Especially common in casual speech</li>
+                            <li>"You know" - Often used when seeking agreement</li>
+                            <li>"Actually" and "Basically" - Unnecessary qualifiers</li>
+                            <li>"Sort of" and "Kind of" - Reduce your authority</li>
+                            <li>"I mean" and "So" - Redundant transitions</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="border rounded-lg p-4">
+                          <h3 className="font-medium mb-2">Why We Use Fillers</h3>
+                          <p className="text-sm text-muted-foreground">
+                            We often use filler words when our brain needs time to catch up with our mouth. 
+                            They're verbal placeholders while we think about what to say next. Being aware of 
+                            them is the first step to eliminating them.
+                          </p>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
-              
-              <Tabs defaultValue="tips">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="tips">Cultural Tips</TabsTrigger>
-                  <TabsTrigger value="examples">Examples</TabsTrigger>
-                </TabsList>
-                <TabsContent value="tips" className="space-y-4 mt-4">
-                  <CultureTipCard
-                    region="Global Business"
-                    title="Business Introductions"
-                    description="How to introduce yourself effectively in international business contexts."
-                    doTips={[
-                      "State your full name clearly and your role in the company",
-                      "Briefly explain what your company/team does in simple terms",
-                      "Mention any relevant experience related to the meeting topic"
-                    ]}
-                    dontTips={[
-                      "Use too many technical terms or industry jargon",
-                      "Share overly personal information",
-                      "Speak too quickly when stating your name and title"
-                    ]}
-                  />
-                  
-                  <CultureTipCard
-                    region="East Asian Context"
-                    title="Formal Business Etiquette"
-                    description="Communicating with Japanese, Chinese, or Korean colleagues."
-                    doTips={[
-                      "Be more formal in your introduction",
-                      "Show respect for hierarchy and titles",
-                      "Use a moderate, measured pace of speech"
-                    ]}
-                    dontTips={[
-                      "Be overly casual or use slang",
-                      "Speak too directly about problems or challenges",
-                      "Rush through your introduction"
-                    ]}
-                  />
-                </TabsContent>
-                <TabsContent value="examples">
-                  <div className="space-y-4 mt-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <PlayIcon className="h-4 w-4 text-logenia-500" />
-                        <h3 className="font-medium">Strong Introduction Example</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        "Hello everyone, I'm Sarah Johnson, the Senior Marketing Director at TechSolutions. 
-                        Our company specializes in cloud security software for enterprise businesses. 
-                        I've been working with international clients for over five years, and I'm looking 
-                        forward to exploring how our services might address your security needs."
-                      </p>
-                    </div>
-                    
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <PlayIcon className="h-4 w-4 text-logenia-500" />
-                        <h3 className="font-medium">Clear and Concise Example</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        "Good morning. My name is David Chen from Innovate Solutions. I'm the Lead Project Manager 
-                        for the Eastern Region. Our company develops custom software solutions for the healthcare 
-                        industry. I'm here today to discuss how we might help streamline your patient management processes."
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
             </div>
           </div>
         </div>

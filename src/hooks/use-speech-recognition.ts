@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface UseSpeechRecognitionProps {
   onTranscriptChange?: (transcript: string) => void;
@@ -24,7 +24,11 @@ export function useSpeechRecognition({
   const startListening = () => {
     if (!('webkitSpeechRecognition' in window)) {
       setError('Speech recognition is not supported in your browser.');
-      toast.error('Speech recognition is not supported in your browser.');
+      toast({
+        title: "Error",
+        description: 'Speech recognition is not supported in your browser.',
+        variant: "destructive"
+      });
       return false;
     }
     
@@ -78,7 +82,11 @@ export function useSpeechRecognition({
     } catch (err) {
       console.error('Error starting speech recognition:', err);
       setError('Error starting speech recognition');
-      toast.error('Error starting speech recognition');
+      toast({
+        title: "Error",
+        description: 'Error starting speech recognition',
+        variant: "destructive"
+      });
       return false;
     }
   };
