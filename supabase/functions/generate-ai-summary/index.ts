@@ -100,21 +100,21 @@ serve(async (req) => {
       // Continue with the browser's transcript if Whisper fails
     }
 
-    // If we don't have any transcript, use a mock analysis
-    if (!finalTranscript || finalTranscript.trim().length === 0) {
-      console.warn("No transcript available, using mock response");
+    // More robust transcript checking
+    if (!finalTranscript || finalTranscript.trim().length < 10) {
+      console.error("Transcript is empty or too short — not sending to GPT");
       
       return new Response(
         JSON.stringify({ 
-          error: "No transcript available for analysis",
-          transcript: "",
+          error: "Transcript too short or empty. Please try again with a longer speech sample.",
+          transcript: finalTranscript || "",
           feedback: {
             fillerWords: [],
             clarity: 50,
             pace: "good",
             structure: 50,
-            suggestions: ["Could not analyze your speech. Please try again and speak clearly."],
-            summary: "No speech was detected. Please try speaking louder or check your microphone."
+            suggestions: ["Your speech was too short to analyze. Please speak for at least a few sentences."],
+            summary: "We need more speech content to provide meaningful feedback. Try recording again and speaking for longer."
           }
         }),
         {
@@ -127,57 +127,63 @@ serve(async (req) => {
     console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100) + "...");
 
     // STEP 2: Generate AI feedback on the transcript using GPT-4o
-    const feedbackResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
+    try {
+      console.log("Sending to GPT:", finalTranscript);
+      const feedbackResponse = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional speech coach focused on helping users improve their spoken English in professional settings.
+            
+            Analyze the transcript strictly based on its content. Do not infer or invent details beyond what the user said.
+            Do not guess how the user spoke, do not assume emotional tone or intent, and do not fabricate examples 
+            unless they appear in the transcription.
+            
+            Your analysis should include:
+            
+            1. Filler Word Count - Count only the actual filler words (e.g., "um," "uh," "like," "you know") 
+               that appear in the transcript. List each word and how many times it was used.
+            2. Pacing & Fluency - Identify any signs of rushed or hesitant phrasing visible in the transcription.
+               Only comment if this is evident in the actual words.
+            3. Clarity & Structure - Evaluate whether the ideas are logically structured and easy to follow.
+            4. Improvement Suggestions - Give 1-2 specific, practical tips based ONLY on the actual transcript.
+               If the text is already clear and fluent, say so.
+            
+            Format your response as JSON with these fields:
+            - fillerWords: Array of objects with {word: string, count: number}
+            - clarity: number from 0-100
+            - pace: "too slow", "good", or "too fast"
+            - structure: number from 0-100 
+            - suggestions: Array of suggestion strings
+            - summary: Brief text summary of the analysis, ending with an encouraging statement.`
+          },
+          {
+            role: "user",
+            content: finalTranscript
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100) + "...");
+      const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
+
+      // Return the transcript and feedback
+      return new Response(
+        JSON.stringify({
+          transcript: finalTranscript,
+          feedback
+        }),
         {
-          role: "system",
-          content: `You are a professional speech coach focused on helping users improve their spoken English in professional settings.
-          
-          Analyze the transcript strictly based on its content. Do not infer or invent details beyond what the user said.
-          Do not guess how the user spoke, do not assume emotional tone or intent, and do not fabricate examples 
-          unless they appear in the transcription.
-          
-          Your analysis should include:
-          
-          1. Filler Word Count - Count only the actual filler words (e.g., "um," "uh," "like," "you know") 
-             that appear in the transcript. List each word and how many times it was used.
-          2. Pacing & Fluency - Identify any signs of rushed or hesitant phrasing visible in the transcription.
-             Only comment if this is evident in the actual words.
-          3. Clarity & Structure - Evaluate whether the ideas are logically structured and easy to follow.
-          4. Improvement Suggestions - Give 1-2 specific, practical tips based ONLY on the actual transcript.
-             If the text is already clear and fluent, say so.
-          
-          Format your response as JSON with these fields:
-          - fillerWords: Array of objects with {word: string, count: number}
-          - clarity: number from 0-100
-          - pace: "too slow", "good", or "too fast"
-          - structure: number from 0-100 
-          - suggestions: Array of suggestion strings
-          - summary: Brief text summary of the analysis, ending with an encouraging statement.`
-        },
-        {
-          role: "user",
-          content: finalTranscript
+          headers: { "Content-Type": "application/json" },
+          status: 200,
         }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
-    console.log("Got feedback from GPT-4o:", JSON.stringify(feedback).substring(0, 100) + "...");
-
-    // Return the transcript and feedback
-    return new Response(
-      JSON.stringify({
-        transcript: finalTranscript,
-        feedback
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+      );
+    } catch (gptError) {
+      console.error("Error with GPT analysis:", gptError);
+      throw new Error("Failed to analyze speech with GPT: " + gptError.message);
+    }
   } catch (error) {
     console.error("Error processing request:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

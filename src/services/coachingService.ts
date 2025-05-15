@@ -80,6 +80,12 @@ export async function analyzeRecording(
       throw new Error("Empty audio recording");
     }
     
+    // Validate transcript
+    if (!transcript || transcript.trim().length < 10) {
+      console.error("Transcript is too short or empty:", transcript);
+      // Continue anyway since we might get a better transcript from Whisper
+    }
+    
     // Convert blob to base64 with improved error handling
     const audioBase64Promise = new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
