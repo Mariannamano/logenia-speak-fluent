@@ -76,8 +76,7 @@ export function setupSpeechRecognition(): SpeechRecognition | null {
     return null;
   }
 
-  // @ts-ignore - WebSpeech API TypeScript definitions
-  const recognition = new webkitSpeechRecognition();
+  const recognition = new window.webkitSpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = "en-US";
