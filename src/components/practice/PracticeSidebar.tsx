@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import CultureTipCard from "@/components/CultureTipCard";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const PracticeSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,26 +20,22 @@ const PracticeSidebar = () => {
           <Info className="h-4 w-4" />
           Tips to Reduce Filler Words
         </CardTitle>
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="show-tips" className="text-sm font-normal">
+            {isOpen ? "Hide Tips" : "Show Tips"}
+          </Label>
+          <Switch
+            id="show-tips"
+            checked={isOpen}
+            onCheckedChange={setIsOpen}
+            aria-label={isOpen ? "Hide tips" : "Show tips"}
+          />
+        </div>
         <Collapsible
           open={isOpen}
           onOpenChange={setIsOpen}
           className="w-full"
         >
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="p-1 h-8">
-              {isOpen ? (
-                <div className="flex items-center gap-1">
-                  <span className="text-sm">Hide Tips</span>
-                  <ChevronUp className="h-4 w-4" />
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <span className="text-sm">Show Tips</span>
-                  <ChevronDown className="h-4 w-4" />
-                </div>
-              )}
-            </Button>
-          </CollapsibleTrigger>
           <CollapsibleContent 
             className={cn(
               "overflow-hidden transition-all",
