@@ -1,7 +1,9 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { getRealtimeFeedback } from "@/services/coachingService";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { useRecordingTimer } from "@/hooks/use-recording-timer";
+import { useRealtimeFeedback } from "@/hooks/use-realtime-feedback";
 import { toast } from "@/hooks/use-toast";
 
 interface FeedbackItem {
@@ -24,16 +26,9 @@ export function useRecording({
   onRecordingComplete,
   enableRealtimeFeedback = true
 }: UseRecordingProps = {}) {
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<BlobPart[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const feedbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastProcessedTextRef = useRef<string>("");
-  const audioChunksRef = useRef<BlobPart[]>([]);
 
+  // Speech recognition hook
   const {
     transcript,
     isListening,
@@ -48,156 +43,69 @@ export function useRecording({
     }
   });
 
-  // Process feedback at intervals when recording
-  useEffect(() => {
-    if (isListening && enableRealtimeFeedback) {
-      // Set up interval to process feedback every 3 seconds
-      feedbackIntervalRef.current = setInterval(async () => {
-        // Only process if we have new content
-        if (transcript && transcript !== lastProcessedTextRef.current) {
-          const newContent = transcript.substring(lastProcessedTextRef.current.length).trim();
-          if (newContent.split(' ').length > 3) { // Only process if we have enough new words
-            const feedback = await getRealtimeFeedback(newContent);
-            lastProcessedTextRef.current = transcript;
-            
-            if (onFeedbackUpdate && feedback.length > 0) {
-              onFeedbackUpdate(feedback);
-            }
-          }
-        }
-      }, 3000);
-    }
-    
-    return () => {
-      if (feedbackIntervalRef.current) {
-        clearInterval(feedbackIntervalRef.current);
+  // Audio recorder hook
+  const { 
+    isRecording, 
+    isLoading, 
+    startRecording: startAudioRecording, 
+    stopRecording: stopAudioRecording 
+  } = useAudioRecorder({
+    onRecordingComplete: (audioBlob) => {
+      if (onRecordingComplete) {
+        onRecordingComplete(audioBlob, transcript);
       }
-    };
-  }, [isListening, enableRealtimeFeedback, onFeedbackUpdate, transcript]);
-
-  // Track recording time
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isListening) {
-      interval = setInterval(() => {
-        setElapsedTime(prev => {
-          const newTime = prev + 1;
-          setProgress((newTime / maxDuration) * 100);
-          
-          if (newTime >= maxDuration) {
-            handleStopRecording();
-          }
-          
-          return newTime;
-        });
-      }, 1000);
     }
-    
-    return () => clearInterval(interval);
-  }, [isListening, maxDuration]);
+  });
 
-  const handleStartRecording = async () => {
-    setIsLoading(true);
+  // Timer hook
+  const { 
+    elapsedTime, 
+    progress, 
+    resetTimer 
+  } = useRecordingTimer({
+    isActive: isListening,
+    maxDuration,
+    onTimerComplete: handleStopRecording
+  });
+
+  // Feedback hook
+  const { resetFeedback } = useRealtimeFeedback({
+    isActive: isListening && enableRealtimeFeedback,
+    transcript,
+    onFeedbackUpdate
+  });
+
+  // Handlers
+  async function handleStartRecording() {
     resetTranscript();
-    lastProcessedTextRef.current = "";
-    audioChunksRef.current = [];
+    resetFeedback();
+    resetTimer();
     setAudioChunks([]);
     
-    try {
-      // Start audio recording with OPTIMAL settings for best Whisper transcription results
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          channelCount: 1, // Mono for better speech recognition
-          sampleRate: 44100, // Higher sample rate for quality
-        } 
-      });
-      
-      // Use webm format with opus codec which works well with Whisper
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-        ? 'audio/webm;codecs=opus' 
-        : MediaRecorder.isTypeSupported('audio/webm')
-          ? 'audio/webm'
-          : 'audio/mp4';
-      
-      console.log(`Using MIME type: ${mimeType} for recording`);
-      
-      const recorder = new MediaRecorder(stream, { 
-        mimeType,
-        audioBitsPerSecond: 128000 // 128 kbps for good audio quality
-      });
-      
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          console.log("Recorded audio chunk of size:", event.data.size, "type:", event.data.type);
-          audioChunksRef.current = [...audioChunksRef.current, event.data];
-          setAudioChunks(prevChunks => [...prevChunks, event.data]);
-        }
-      };
-      
-      recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        console.log("Recording stopped, chunks:", audioChunksRef.current.length, "blob size:", audioBlob.size, "type:", audioBlob.type);
-        
-        if (onRecordingComplete && audioBlob.size > 0) {
-          onRecordingComplete(audioBlob, transcript);
-        } else if (audioBlob.size === 0) {
-          toast({
-            title: "Recording Error",
-            description: "No audio was recorded. Please check your microphone and try again.",
-            variant: "destructive"
-          });
-        }
-      };
-      
-      // Request data every 500ms for more frequent chunks
-      recorder.start(500);
-      setMediaRecorder(recorder);
-      setElapsedTime(0);
-      setProgress(0);
-      
+    const audioStarted = await startAudioRecording();
+    
+    if (audioStarted) {
       // Start speech recognition
-      const started = startListening();
-      if (started) {
+      const speechStarted = startListening();
+      if (speechStarted) {
         toast({
           title: "Recording started",
           description: "Speak clearly and we'll analyze your speech with AI."
         });
       }
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
-      toast({
-        title: "Microphone Error",
-        description: "Could not access microphone. Please check permissions.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }
 
-  const handleStopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      // Stop all audio tracks
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
-    }
-    
+  function handleStopRecording() {
+    stopAudioRecording();
     stopListening();
-    
-    // Clear feedback interval
-    if (feedbackIntervalRef.current) {
-      clearInterval(feedbackIntervalRef.current);
-    }
+    resetFeedback();
     
     toast({
       title: "Recording completed",
       description: "Your speech will now be analyzed with OpenAI."
     });
-  };
+  }
 
   return {
     transcript,
