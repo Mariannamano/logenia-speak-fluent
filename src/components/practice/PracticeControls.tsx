@@ -20,6 +20,7 @@ interface PracticeControlsProps {
   currentTranscript: string;
   enableRealtimeCoaching: boolean;
   setEnableRealtimeCoaching: (enabled: boolean) => void;
+  hasRecording?: boolean; // Add this prop
 }
 
 const PracticeControls = ({
@@ -29,6 +30,7 @@ const PracticeControls = ({
   currentTranscript,
   enableRealtimeCoaching,
   setEnableRealtimeCoaching,
+  hasRecording = false, // Default to false
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
@@ -51,7 +53,7 @@ const PracticeControls = ({
       />
       
       <div className="flex items-center justify-between">
-        <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer">
+        <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer text-lg">
           <span>Enable Real-time Coaching</span>
         </Label>
         <Switch 
@@ -62,8 +64,8 @@ const PracticeControls = ({
       </div>
       
       <div className="border-t pt-4">
-        <Label className="mb-2 flex items-center gap-2">
-          <Mic className="h-4 w-4" />
+        <Label className="mb-2 flex items-center gap-2 text-lg">
+          <Mic className="h-5 w-5" />
           Start Speaking
         </Label>
         <RecordingControl 
@@ -76,9 +78,9 @@ const PracticeControls = ({
       </div>
       
       {currentTranscript && !hasRecording && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-md">
-          <Label className="text-xs text-muted-foreground">Live Transcript</Label>
-          <p className="text-sm mt-1">{currentTranscript}</p>
+        <div className="mt-4 p-4 bg-fluent-100 dark:bg-fluent-800/40 rounded-md border border-fluent-200 dark:border-fluent-700/50">
+          <Label className="text-sm text-muted-foreground">Live Transcript</Label>
+          <p className="text-base mt-1">{currentTranscript}</p>
         </div>
       )}
     </div>

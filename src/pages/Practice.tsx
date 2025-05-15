@@ -68,6 +68,7 @@ const Practice = () => {
                   currentTranscript={currentTranscript}
                   enableRealtimeCoaching={enableRealtimeCoaching}
                   setEnableRealtimeCoaching={setEnableRealtimeCoaching}
+                  hasRecording={hasRecording}
                 />
               </div>
             </CardContent>
@@ -78,7 +79,7 @@ const Practice = () => {
             <Card className="mb-8">
               <CardContent className="pt-6">
                 <h3 className="text-xl font-semibold mb-3">Complete Transcript</h3>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md text-lg">
+                <div className="p-4 bg-fluent-100 dark:bg-fluent-800/40 rounded-md text-lg border border-fluent-200 dark:border-fluent-700/50">
                   {completeTranscript}
                 </div>
               </CardContent>

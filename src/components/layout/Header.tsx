@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Owl } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 
 const Header = () => {
@@ -13,8 +13,12 @@ const Header = () => {
     <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <span className="bg-fluent-primary text-white w-8 h-8 rounded-md flex items-center justify-center">
-            <Owl className="h-5 w-5" />
+          <span className="bg-fluent-primary text-white w-10 h-10 rounded-md flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/f906f3fc-f516-4696-8a30-12aca44464c8.png" 
+              alt="Purple Owl Logo" 
+              className="w-8 h-8"
+            />
           </span>
           <span className="font-semibold text-lg md:text-xl">Fluent Lounge</span>
         </Link>
