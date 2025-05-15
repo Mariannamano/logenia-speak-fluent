@@ -22,7 +22,6 @@ export function useSpeechRecognition({
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   const startListening = () => {
-    // @ts-ignore - WebSpeech API TypeScript definitions
     if (!('webkitSpeechRecognition' in window)) {
       setError('Speech recognition is not supported in your browser.');
       toast.error('Speech recognition is not supported in your browser.');
@@ -34,8 +33,7 @@ export function useSpeechRecognition({
     }
     
     try {
-      // @ts-ignore - WebSpeech API TypeScript definitions
-      recognitionRef.current = new webkitSpeechRecognition();
+      recognitionRef.current = new window.webkitSpeechRecognition();
       recognitionRef.current.continuous = continuous;
       recognitionRef.current.interimResults = interimResults;
       recognitionRef.current.lang = lang;
