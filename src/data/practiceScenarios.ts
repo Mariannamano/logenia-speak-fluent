@@ -162,5 +162,159 @@ export const practiceCategories: ScenarioCategory[] = [
         category: "Personal"
       }
     ]
+  },
+  {
+    id: "opinions",
+    name: "Opinions & Debate",
+    description: "Practice expressing your views clearly and respectfully while backing them up with examples or observations.",
+    scenarios: [
+      {
+        id: "remote-work-productivity",
+        title: "Remote Work Productivity",
+        description: "Share your opinion on remote work productivity",
+        prompt: "Do you think remote work makes people more productive? Share your opinion and back it up with an example or observation.",
+        category: "Group Discussion"
+      },
+      {
+        id: "social-media-mental-health",
+        title: "Social Media & Mental Health",
+        description: "Discuss social media's impact on mental health",
+        prompt: "A friend from another country asks what you think about social media and mental health. Reflect on your personal experience and what you've seen around you.",
+        category: "Personal Reflection"
+      },
+      {
+        id: "coding-importance",
+        title: "Coding for Everyone?",
+        description: "Debate whether everyone should learn coding",
+        prompt: "You're in a panel discussion and asked: 'Should everyone learn to code?' Answer like you're speaking to a mixed audience — clearly and with structure.",
+        category: "Panel Discussion"
+      },
+      {
+        id: "grades-importance",
+        title: "Do Grades Matter?",
+        description: "Respectfully disagree about the importance of grades",
+        prompt: "A colleague says grades don't matter — you disagree. Explain your view respectfully and give a story that supports it.",
+        category: "Disagreement"
+      },
+      {
+        id: "work-life-balance",
+        title: "Work-Life Balance Reality",
+        description: "Reflect on whether work-life balance is achievable",
+        prompt: "Someone challenges you: 'Is work-life balance even real?' Reflect honestly. Talk about a time you felt you had (or didn't have) it.",
+        category: "Honest Reflection"
+      },
+      {
+        id: "startup-vs-bigco",
+        title: "Startup vs. Big Company",
+        description: "Compare career growth options between startups and big companies",
+        prompt: "You're asked: 'Startup or big company — which is better for career growth?' Share your perspective, and talk about your own preferences or experience.",
+        category: "Career Advice"
+      },
+      {
+        id: "ai-job-replacement",
+        title: "AI Job Replacement",
+        description: "Discuss the pace of AI replacing jobs",
+        prompt: "You're in a casual debate: 'Is AI replacing too many jobs too fast?' Speak naturally and explore both sides if you can.",
+        category: "Casual Debate"
+      },
+      {
+        id: "team-diversity",
+        title: "Team Diversity Impact",
+        description: "Share thoughts on diversity's effect on team performance",
+        prompt: "A teammate asks: 'Do you think team diversity actually improves performance?' Respond thoughtfully, ideally with an example from your own work.",
+        category: "Team Dynamics"
+      },
+      {
+        id: "free-college",
+        title: "Should College Be Free?",
+        description: "Express your view on college affordability",
+        prompt: "You're talking with peers and someone asks: 'Should college be free?' Express your view and tie it to your background or values.",
+        category: "Social Policy"
+      },
+      {
+        id: "linkedin-posting",
+        title: "Professional Social Media",
+        description: "Discuss appropriate LinkedIn content",
+        prompt: "Someone in your industry asks: 'Should people post about work stuff on LinkedIn or not?' Say what you think and why — from authenticity to attention-seeking.",
+        category: "Professional Etiquette"
+      }
+    ]
+  },
+  {
+    id: "presenting",
+    name: "Public Speaking & Presenting",
+    description: "Build confidence in formal presentation settings where structure and clarity are essential.",
+    scenarios: [
+      {
+        id: "presentation-intro",
+        title: "Presentation Opening",
+        description: "Start a team presentation with a strong introduction",
+        prompt: "You're opening a team presentation and introducing yourself and the topic. Start strong and clearly explain what your audience can expect.",
+        category: "Team Presentation"
+      },
+      {
+        id: "quarterly-results",
+        title: "Quarterly Results Report",
+        description: "Present performance data to your department",
+        prompt: "You're presenting quarterly results to your department. Walk through the numbers, explain trends, and highlight one key takeaway.",
+        category: "Data Presentation"
+      },
+      {
+        id: "team-explanation",
+        title: "Team Introduction",
+        description: "Explain your team's function to interns",
+        prompt: "You've been asked to explain what your team does to a visiting group of interns. Make it simple, clear, and interesting — like you're teaching it for the first time.",
+        category: "Onboarding"
+      },
+      {
+        id: "product-demo",
+        title: "Product Demo",
+        description: "Demonstrate a product or tool you use regularly",
+        prompt: "You're giving a demo of a product or tool you use often. Describe how it works, who uses it, and what problem it solves.",
+        category: "Demo"
+      },
+      {
+        id: "startup-pitch",
+        title: "Startup Pitch",
+        description: "Pitch a business idea at a competition",
+        prompt: "You're pitching a startup idea at a student competition. State the problem, your solution, and why it's needed — like it's your elevator pitch.",
+        category: "Pitch"
+      },
+      {
+        id: "meeting-summary",
+        title: "Meeting Wrap-up",
+        description: "Close a meeting with key decisions summarized",
+        prompt: "You're asked to close a meeting by summarizing key decisions. Wrap it up in a concise, confident tone that shows leadership.",
+        category: "Leadership"
+      },
+      {
+        id: "internship-presentation",
+        title: "Internship Experience",
+        description: "Share your internship experience with a student club",
+        prompt: "You've been asked to present at a student club about your internship experience. Share highlights, what surprised you, and any lessons learned.",
+        category: "Student Presentation"
+      },
+      {
+        id: "training-session",
+        title: "New Hire Training",
+        description: "Explain a concept during new hire training",
+        prompt: "You're leading a training session for new hires. Pick one concept and explain it like you're onboarding someone.",
+        category: "Training"
+      },
+      {
+        id: "qa-response",
+        title: "Q&A Response",
+        description: "Answer an unexpected question after your presentation",
+        prompt: "You're answering a follow-up question after your presentation. Stay calm and respond like you didn't expect the question — keep clarity under pressure.",
+        category: "Q&A"
+      },
+      {
+        id: "networking-introduction",
+        title: "60-Second Introduction",
+        description: "Deliver a brief, engaging introduction at a networking event",
+        prompt: "You're asked to speak for 1 minute at a networking event: 'Tell us who you are and what excites you right now.' Make it engaging but filler-free — and end with confidence.",
+        category: "Networking"
+      }
+    ]
   }
 ];

@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Book } from "lucide-react";
+import { Briefcase, Book, MessageSquare, Presentation } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface Scenario {
@@ -37,6 +37,36 @@ interface ScenarioSelectorProps {
   onScenarioChange: (scenario: Scenario) => void;
 }
 
+const getCategoryIcon = (categoryId: string) => {
+  switch (categoryId) {
+    case "professional":
+      return <Briefcase className="h-4 w-4" />;
+    case "storytelling":
+      return <Book className="h-4 w-4" />;
+    case "opinions":
+      return <MessageSquare className="h-4 w-4" />;
+    case "presenting":
+      return <Presentation className="h-4 w-4" />;
+    default:
+      return <Book className="h-4 w-4" />;
+  }
+};
+
+const getCategoryShortName = (categoryId: string) => {
+  switch (categoryId) {
+    case "professional":
+      return "Work";
+    case "storytelling":
+      return "Story";
+    case "opinions":
+      return "Debate";
+    case "presenting":
+      return "Present";
+    default:
+      return categoryId;
+  }
+};
+
 const ScenarioSelector = ({
   categories,
   selectedScenario,
@@ -54,7 +84,7 @@ const ScenarioSelector = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
-        <Briefcase className="h-4 w-4" />
+        {getCategoryIcon(activeCategory)}
         <Label>Select Practice Scenario</Label>
       </div>
       
@@ -63,25 +93,23 @@ const ScenarioSelector = ({
         onValueChange={handleCategoryChange}
         className="w-full"
       >
-        <TabsList className="grid grid-cols-2 w-full">
-          {categories.map((cat) => (
-            <TabsTrigger 
-              key={cat.id} 
-              value={cat.id}
-              className="flex items-center gap-2"
-            >
-              {cat.id === "professional" ? (
-                <Briefcase className="h-4 w-4" />
-              ) : (
-                <Book className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">{cat.name}</span>
-              <span className="sm:hidden">
-                {cat.id === "professional" ? "Work" : "Story"}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <ScrollArea className="w-full pb-2">
+          <TabsList className="grid grid-cols-4 w-full">
+            {categories.map((cat) => (
+              <TabsTrigger 
+                key={cat.id} 
+                value={cat.id}
+                className="flex items-center gap-2"
+              >
+                {getCategoryIcon(cat.id)}
+                <span className="hidden sm:inline">{cat.name.split(' ')[0]}</span>
+                <span className="sm:hidden">
+                  {getCategoryShortName(cat.id)}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </ScrollArea>
         
         {categories.map((cat) => (
           <TabsContent key={cat.id} value={cat.id} className="mt-4">
