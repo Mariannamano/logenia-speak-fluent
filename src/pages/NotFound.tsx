@@ -22,13 +22,13 @@ const NotFound = () => {
       <main className="flex-1 flex items-center justify-center py-16">
         <div className="container px-4 md:px-6 text-center">
           <div className="space-y-4">
-            <h1 className="text-6xl font-bold text-logenia-600">404</h1>
+            <h1 className="text-6xl font-bold text-fluent-primary">404</h1>
             <h2 className="text-2xl font-medium">Page Not Found</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
               Sorry, we couldn't find the page you're looking for. It might have been moved or doesn't exist.
             </p>
             <div className="pt-4">
-              <Button asChild className="bg-logenia-500 hover:bg-logenia-600">
+              <Button asChild className="bg-fluent-primary hover:bg-fluent-600">
                 <Link to="/">Return to Home</Link>
               </Button>
             </div>

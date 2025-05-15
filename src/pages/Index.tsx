@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -269,9 +268,9 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredRooms.map((room) => (
-                <Link to={`/practice?category=${room.id}`} key={room.id}>
+                <div key={room.id}>
                   <RoomCard {...room} />
-                </Link>
+                </div>
               ))}
             </div>
 

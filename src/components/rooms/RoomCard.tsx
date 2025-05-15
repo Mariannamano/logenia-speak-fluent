@@ -65,8 +65,11 @@ const RoomCard = ({
           <Badge variant="outline">{participants} participant{participants !== 1 ? 's' : ''}</Badge>
         </div>
         
-        <Button asChild className="w-full bg-fluent-primary hover:bg-fluent-600 text-white">
-          <Link to={`/practice/${id}`}>Enter Room</Link>
+        <Button 
+          asChild 
+          className="w-full bg-fluent-primary hover:bg-fluent-600 text-white"
+        >
+          <Link to={`/practice?category=${id}`}>Enter Room</Link>
         </Button>
       </CardContent>
     </Card>

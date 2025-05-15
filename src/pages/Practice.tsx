@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FeedbackPanel from "@/components/FeedbackPanel";
@@ -8,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
 import PracticeControls from "@/components/practice/PracticeControls";
 import { analyzeRecording, SpeechAnalysis } from "@/services/coachingService";
+import { practiceCategories } from "@/data/practiceScenarios";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -15,6 +17,7 @@ interface FeedbackItem {
 }
 
 const Practice = () => {
+  const location = useLocation();
   const [hasRecording, setHasRecording] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [completeTranscript, setCompleteTranscript] = useState("");
@@ -24,6 +27,17 @@ const Practice = () => {
   const [fillerWordCount, setFillerWordCount] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
+  const [initialCategory, setInitialCategory] = useState<string | null>(null);
+  
+  // Extract category from URL query parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const category = searchParams.get("category");
+    if (category) {
+      setInitialCategory(category);
+      console.log("Initial category set from URL:", category);
+    }
+  }, [location.search]);
   
   const handleRecordingComplete = async (audioBlob: Blob, transcript: string) => {
     console.log("Recording completed:", audioBlob);
@@ -97,6 +111,7 @@ const Practice = () => {
                   enableRealtimeCoaching={enableRealtimeCoaching}
                   setEnableRealtimeCoaching={setEnableRealtimeCoaching}
                   hasRecording={hasRecording}
+                  initialCategory={initialCategory}
                 />
               </div>
             </CardContent>

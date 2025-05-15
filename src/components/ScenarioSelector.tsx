@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Select, 
   SelectContent, 
@@ -35,6 +35,7 @@ interface ScenarioSelectorProps {
   categories: ScenarioCategory[];
   selectedScenario: Scenario | null;
   onScenarioChange: (scenario: Scenario) => void;
+  initialCategory?: string | null;
 }
 
 const getCategoryIcon = (categoryId: string) => {
@@ -71,8 +72,22 @@ const ScenarioSelector = ({
   categories,
   selectedScenario,
   onScenarioChange,
+  initialCategory = null,
 }: ScenarioSelectorProps) => {
-  const [activeCategory, setActiveCategory] = useState(categories[0]?.id || "");
+  // Find the default category
+  const defaultCategory = initialCategory && categories.find(cat => cat.id === initialCategory)
+    ? initialCategory 
+    : categories[0]?.id || "";
+    
+  const [activeCategory, setActiveCategory] = useState(defaultCategory);
+
+  // Update active category when initialCategory changes
+  useEffect(() => {
+    if (initialCategory && categories.some(cat => cat.id === initialCategory)) {
+      setActiveCategory(initialCategory);
+      console.log("Setting active category in ScenarioSelector:", initialCategory);
+    }
+  }, [initialCategory, categories]);
 
   const currentCategory = categories.find(cat => cat.id === activeCategory) || categories[0];
   const scenarios = currentCategory?.scenarios || [];

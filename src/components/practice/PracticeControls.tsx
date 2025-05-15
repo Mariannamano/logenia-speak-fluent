@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Mic } from "lucide-react";
@@ -20,7 +20,8 @@ interface PracticeControlsProps {
   currentTranscript: string;
   enableRealtimeCoaching: boolean;
   setEnableRealtimeCoaching: (enabled: boolean) => void;
-  hasRecording?: boolean; // Add this prop
+  hasRecording?: boolean;
+  initialCategory?: string | null;
 }
 
 const PracticeControls = ({
@@ -30,10 +31,20 @@ const PracticeControls = ({
   currentTranscript,
   enableRealtimeCoaching,
   setEnableRealtimeCoaching,
-  hasRecording = false, // Default to false
+  hasRecording = false,
+  initialCategory = null,
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If initialCategory is provided, set it as the active category
+    if (initialCategory) {
+      setActiveCategory(initialCategory);
+      console.log("Setting initial category in PracticeControls:", initialCategory);
+    }
+  }, [initialCategory]);
 
   const handleScenarioChange = (scenario: Scenario) => {
     setSelectedScenario(scenario);
@@ -50,6 +61,7 @@ const PracticeControls = ({
         categories={practiceCategories}
         selectedScenario={selectedScenario}
         onScenarioChange={handleScenarioChange}
+        initialCategory={initialCategory}
       />
       
       <div className="flex items-center justify-between">
