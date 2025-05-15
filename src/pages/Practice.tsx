@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -7,7 +6,7 @@ import FeedbackPanel from "@/components/FeedbackPanel";
 import CultureTipCard from "@/components/CultureTipCard";
 import RealtimeFeedback from "@/components/RealtimeFeedback";
 import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
-import { professionalScenarios } from "@/data/practiceScenarios";
+import { practiceCategories } from "@/data/practiceScenarios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -106,7 +105,7 @@ const Practice = () => {
                     
                     {/* Scenario Selector */}
                     <ScenarioSelector 
-                      scenarios={professionalScenarios}
+                      categories={practiceCategories}
                       selectedScenario={selectedScenario}
                       onScenarioChange={handleScenarioChange}
                     />

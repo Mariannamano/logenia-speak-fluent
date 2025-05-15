@@ -1,15 +1,20 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
-  SelectValue 
+  SelectValue,
+  SelectGroup,
+  SelectLabel
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Briefcase, Book } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface Scenario {
   id: string;
@@ -19,17 +24,33 @@ export interface Scenario {
   category: string;
 }
 
-interface ScenarioSelectorProps {
+export interface ScenarioCategory {
+  id: string;
+  name: string;
+  description: string;
   scenarios: Scenario[];
+}
+
+interface ScenarioSelectorProps {
+  categories: ScenarioCategory[];
   selectedScenario: Scenario | null;
   onScenarioChange: (scenario: Scenario) => void;
 }
 
 const ScenarioSelector = ({
-  scenarios,
+  categories,
   selectedScenario,
   onScenarioChange,
 }: ScenarioSelectorProps) => {
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.id || "");
+
+  const currentCategory = categories.find(cat => cat.id === activeCategory) || categories[0];
+  const scenarios = currentCategory?.scenarios || [];
+
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
@@ -37,29 +58,75 @@ const ScenarioSelector = ({
         <Label>Select Practice Scenario</Label>
       </div>
       
-      <Select
-        value={selectedScenario?.id || ""}
-        onValueChange={(value) => {
-          const selected = scenarios.find(s => s.id === value);
-          if (selected) onScenarioChange(selected);
-        }}
+      <Tabs 
+        value={activeCategory} 
+        onValueChange={handleCategoryChange}
+        className="w-full"
       >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Choose a scenario to practice" />
-        </SelectTrigger>
-        <SelectContent>
-          {scenarios.map((scenario) => (
-            <SelectItem key={scenario.id} value={scenario.id}>
-              {scenario.title}
-            </SelectItem>
+        <TabsList className="grid grid-cols-2 w-full">
+          {categories.map((cat) => (
+            <TabsTrigger 
+              key={cat.id} 
+              value={cat.id}
+              className="flex items-center gap-2"
+            >
+              {cat.id === "professional" ? (
+                <Briefcase className="h-4 w-4" />
+              ) : (
+                <Book className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">{cat.name}</span>
+              <span className="sm:hidden">
+                {cat.id === "professional" ? "Work" : "Story"}
+              </span>
+            </TabsTrigger>
           ))}
-        </SelectContent>
-      </Select>
+        </TabsList>
+        
+        {categories.map((cat) => (
+          <TabsContent key={cat.id} value={cat.id} className="mt-4">
+            <Card className="bg-muted/30">
+              <CardContent className="pt-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {cat.description}
+                </p>
+                
+                <Select
+                  value={selectedScenario?.id || ""}
+                  onValueChange={(value) => {
+                    const selected = cat.scenarios.find(s => s.id === value);
+                    if (selected) onScenarioChange(selected);
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background">
+                    <SelectValue placeholder="Choose a scenario to practice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <ScrollArea className="h-[200px]">
+                      <SelectGroup>
+                        <SelectLabel>{cat.name}</SelectLabel>
+                        {cat.scenarios.map((scenario) => (
+                          <SelectItem key={scenario.id} value={scenario.id}>
+                            {scenario.title}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </ScrollArea>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
 
       {selectedScenario && (
         <Card className="mt-4 bg-muted/50">
           <CardContent className="pt-4">
-            <h4 className="font-medium mb-1">{selectedScenario.title}</h4>
+            <div className="flex justify-between items-start mb-1">
+              <h4 className="font-medium">{selectedScenario.title}</h4>
+              <Badge variant="outline">{selectedScenario.category}</Badge>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">{selectedScenario.description}</p>
             <div className="bg-background p-3 rounded-md border">
               <Label className="text-xs">Your prompt:</Label>
