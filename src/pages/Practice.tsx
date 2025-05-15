@@ -16,6 +16,7 @@ interface FeedbackItem {
 const Practice = () => {
   const [hasRecording, setHasRecording] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState("");
+  const [completeTranscript, setCompleteTranscript] = useState("");
   const [realtimeFeedback, setRealtimeFeedback] = useState<FeedbackItem[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [enableRealtimeCoaching, setEnableRealtimeCoaching] = useState(true);
@@ -24,6 +25,7 @@ const Practice = () => {
   const handleRecordingComplete = (audioBlob: Blob) => {
     console.log("Recording completed:", audioBlob);
     setHasRecording(true);
+    setCompleteTranscript(currentTranscript);
   };
   
   const handleTranscriptUpdate = (transcript: string) => {
@@ -70,6 +72,18 @@ const Practice = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Complete Transcript appears after recording */}
+          {hasRecording && (
+            <Card className="mb-8">
+              <CardContent className="pt-6">
+                <h3 className="text-xl font-semibold mb-3">Complete Transcript</h3>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md text-lg">
+                  {completeTranscript}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Feedback appears after recording */}
           {hasRecording && (

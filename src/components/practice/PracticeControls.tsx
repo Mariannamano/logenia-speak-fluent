@@ -75,7 +75,7 @@ const PracticeControls = ({
         />
       </div>
       
-      {currentTranscript && (
+      {currentTranscript && !hasRecording && (
         <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-md">
           <Label className="text-xs text-muted-foreground">Live Transcript</Label>
           <p className="text-sm mt-1">{currentTranscript}</p>
