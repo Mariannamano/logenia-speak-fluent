@@ -13,7 +13,7 @@ interface UseRecordingProps {
   maxDuration?: number;
   onTranscriptUpdate?: (transcript: string) => void;
   onFeedbackUpdate?: (feedback: FeedbackItem[]) => void;
-  onRecordingComplete?: (audioBlob: Blob) => void;
+  onRecordingComplete?: (audioBlob: Blob, transcript: string) => void;
   enableRealtimeFeedback?: boolean;
 }
 
@@ -113,7 +113,7 @@ export function useRecording({
       recorder.onstop = () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         if (onRecordingComplete) {
-          onRecordingComplete(audioBlob);
+          onRecordingComplete(audioBlob, transcript);
         }
       };
       

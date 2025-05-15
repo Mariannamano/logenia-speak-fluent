@@ -48,18 +48,29 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `You are a professional speech coach. Analyze the following transcript for:
-          1. Filler words (um, uh, like, you know, etc.)
-          2. Speech clarity and pace
-          3. Suggestions for improvement
+          content: `You are a professional speech coach focused on helping users improve their spoken English in professional settings.
           
-          Provide specific, actionable feedback. Focus on the most important 2-3 issues.
+          Analyze the transcript strictly based on its content. Do not infer or invent details beyond what the user said.
+          Do not guess how the user spoke, do not assume emotional tone or intent, and do not fabricate examples 
+          unless they appear in the transcription.
+          
+          Your analysis should include:
+          
+          1. Filler Word Count - Count only the actual filler words (e.g., "um," "uh," "like," "you know") 
+             that appear in the transcript. List each word and how many times it was used.
+          2. Pacing & Fluency - Identify any signs of rushed or hesitant phrasing visible in the transcription.
+             Only comment if this is evident in the actual words.
+          3. Clarity & Structure - Evaluate whether the ideas are logically structured and easy to follow.
+          4. Improvement Suggestions - Give 1-2 specific, practical tips based ONLY on the actual transcript.
+             If the text is already clear and fluent, say so.
+          
           Format your response as JSON with these fields:
           - fillerWords: Array of objects with {word: string, count: number}
           - clarity: number from 0-100
           - pace: "too slow", "good", or "too fast"
+          - structure: number from 0-100 
           - suggestions: Array of suggestion strings
-          - summary: Brief text summary of the analysis`
+          - summary: Brief text summary of the analysis, ending with an encouraging statement.`
         },
         {
           role: "user",

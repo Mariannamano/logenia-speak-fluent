@@ -9,6 +9,16 @@ interface FeedbackItem {
   content: string;
 }
 
+// Speech analysis feedback from AI
+export interface SpeechAnalysis {
+  fillerWords: { word: string; count: number }[];
+  clarity: number;
+  pace: string; // "too slow", "good", or "too fast"
+  structure: number;
+  suggestions: string[];
+  summary: string;
+}
+
 // This function would normally call an API, but for now we'll implement filler word detection locally
 export async function getRealtimeFeedback(text: string): Promise<FeedbackItem[]> {
   try {
@@ -56,4 +66,50 @@ export function setupSpeechRecognition(): SpeechRecognition | null {
   recognition.interimResults = true;
   recognition.lang = "en-US";
   return recognition;
+}
+
+// New function to analyze recording with AI
+export async function analyzeRecording(
+  audioBlob: Blob,
+  transcript: string
+): Promise<{ transcript: string; feedback: SpeechAnalysis }> {
+  try {
+    // Convert blob to base64
+    const reader = new FileReader();
+    const audioBase64Promise = new Promise<string>((resolve) => {
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          resolve('');
+        }
+      };
+    });
+    
+    reader.readAsDataURL(audioBlob);
+    const audioBase64 = await audioBase64Promise;
+    
+    // Call the Supabase Edge Function
+    const functionUrl = import.meta.env.VITE_SUPABASE_FUNCTION_URL || 'http://localhost:54321/functions/v1/generate-ai-summary';
+    
+    const response = await axios.post(functionUrl, {
+      audioData: audioBase64,
+      transcript
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error("Error analyzing recording:", error);
+    return {
+      transcript,
+      feedback: {
+        fillerWords: [],
+        clarity: 0,
+        pace: "good",
+        structure: 0,
+        suggestions: ["Could not analyze recording. Please try again."],
+        summary: "Error analyzing your speech. Please try again."
+      }
+    };
+  }
 }

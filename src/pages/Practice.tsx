@@ -7,6 +7,7 @@ import RealtimeFeedback from "@/components/RealtimeFeedback";
 import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
 import PracticeControls from "@/components/practice/PracticeControls";
+import { analyzeRecording, SpeechAnalysis } from "@/services/coachingService";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -21,11 +22,38 @@ const Practice = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [enableRealtimeCoaching, setEnableRealtimeCoaching] = useState(true);
   const [fillerWordCount, setFillerWordCount] = useState(0);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   
-  const handleRecordingComplete = (audioBlob: Blob) => {
+  const handleRecordingComplete = async (audioBlob: Blob, transcript: string) => {
     console.log("Recording completed:", audioBlob);
     setHasRecording(true);
-    setCompleteTranscript(currentTranscript);
+    setCompleteTranscript(transcript);
+    setIsAnalyzing(true);
+    
+    try {
+      // Send recording for AI analysis
+      const result = await analyzeRecording(audioBlob, transcript);
+      
+      // Update transcript with potentially more accurate one from whisper
+      if (result.transcript) {
+        setCompleteTranscript(result.transcript);
+      }
+      
+      // Set the AI analysis results
+      setSpeechAnalysis(result.feedback);
+      
+      // Update filler word count from AI analysis
+      const totalFillerWords = result.feedback.fillerWords.reduce(
+        (sum, item) => sum + item.count, 0
+      );
+      setFillerWordCount(prev => prev + totalFillerWords);
+      
+    } catch (error) {
+      console.error("Error analyzing recording:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
   
   const handleTranscriptUpdate = (transcript: string) => {
@@ -62,7 +90,7 @@ const Practice = () => {
                 <PracticeHeader fillerWordCount={fillerWordCount} />
                 
                 <PracticeControls 
-                  onRecordingComplete={handleRecordingComplete}
+                  onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, currentTranscript)}
                   onTranscriptUpdate={handleTranscriptUpdate}
                   onFeedbackUpdate={handleFeedbackUpdate}
                   currentTranscript={currentTranscript}
@@ -88,7 +116,10 @@ const Practice = () => {
           
           {/* Feedback appears after recording */}
           {hasRecording && (
-            <FeedbackPanel />
+            <FeedbackPanel 
+              analysis={speechAnalysis} 
+              isLoading={isAnalyzing} 
+            />
           )}
         </div>
       </main>

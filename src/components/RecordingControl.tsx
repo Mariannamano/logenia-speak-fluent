@@ -9,7 +9,7 @@ interface FeedbackItem {
 }
 
 interface RecordingControlProps {
-  onRecordingComplete?: (audioBlob: Blob) => void;
+  onRecordingComplete?: (audioBlob: Blob, transcript: string) => void;
   maxDuration?: number; // in seconds
   onTranscriptUpdate?: (transcript: string) => void;
   onFeedbackUpdate?: (feedback: FeedbackItem[]) => void;
@@ -36,7 +36,11 @@ const RecordingControl = ({
     maxDuration,
     onTranscriptUpdate,
     onFeedbackUpdate,
-    onRecordingComplete,
+    onRecordingComplete: (audioBlob: Blob, transcript: string) => {
+      if (onRecordingComplete) {
+        onRecordingComplete(audioBlob, transcript);
+      }
+    },
     enableRealtimeFeedback
   });
 
