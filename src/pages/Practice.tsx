@@ -1,10 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RecordingControl from "@/components/RecordingControl";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import CultureTipCard from "@/components/CultureTipCard";
+import RealtimeFeedback from "@/components/RealtimeFeedback";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -12,15 +12,40 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Clock, Users, Book, MicIcon, GlobeIcon, Info, PlayIcon } from "lucide-react";
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
+}
 
 const Practice = () => {
   const [hasRecording, setHasRecording] = useState(false);
+  const [currentTranscript, setCurrentTranscript] = useState("");
+  const [realtimeFeedback, setRealtimeFeedback] = useState<FeedbackItem[]>([]);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [enableRealtimeCoaching, setEnableRealtimeCoaching] = useState(true);
   
   const handleRecordingComplete = (audioBlob: Blob) => {
     console.log("Recording completed:", audioBlob);
     setHasRecording(true);
     // In a real app, we would send this to a server for processing
+  };
+  
+  const handleTranscriptUpdate = (transcript: string) => {
+    setCurrentTranscript(transcript);
+    console.log("Updated transcript:", transcript);
+  };
+  
+  const handleFeedbackUpdate = (feedback: FeedbackItem[]) => {
+    setRealtimeFeedback(feedback);
+    setShowFeedback(true);
+    
+    // Hide feedback after 10 seconds
+    setTimeout(() => {
+      setShowFeedback(false);
+    }, 10000);
   };
   
   return (
@@ -89,16 +114,37 @@ const Practice = () => {
                       </p>
                     </div>
                     
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer">
+                        <span>Enable Real-time Coaching</span>
+                      </Label>
+                      <Switch 
+                        id="enable-coaching" 
+                        checked={enableRealtimeCoaching} 
+                        onCheckedChange={setEnableRealtimeCoaching}
+                      />
+                    </div>
+                    
                     <div className="border-t pt-4">
                       <Label className="mb-2 flex items-center gap-2">
                         <MicIcon className="h-4 w-4" />
                         Recording
                       </Label>
                       <RecordingControl 
-                        onRecordingComplete={handleRecordingComplete} 
+                        onRecordingComplete={handleRecordingComplete}
+                        onTranscriptUpdate={handleTranscriptUpdate}
+                        onFeedbackUpdate={handleFeedbackUpdate}
+                        enableRealtimeFeedback={enableRealtimeCoaching}
                         maxDuration={120}
                       />
                     </div>
+                    
+                    {currentTranscript && (
+                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-md">
+                        <Label className="text-xs text-muted-foreground">Live Transcript</Label>
+                        <p className="text-sm mt-1">{currentTranscript}</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -229,6 +275,12 @@ const Practice = () => {
           </div>
         </div>
       </main>
+      
+      {/* Real-time Feedback Component */}
+      <RealtimeFeedback 
+        feedback={realtimeFeedback} 
+        isVisible={showFeedback} 
+      />
       
       <Footer />
     </div>
