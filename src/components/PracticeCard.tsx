@@ -41,27 +41,27 @@ const PracticeCard = ({
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{title}</CardTitle>
+          <CardTitle className="text-xl">{title}</CardTitle>
           <Badge className={`${getLevelColor(level)}`}>{level}</Badge>
         </div>
-        <CardDescription className="line-clamp-2">{description}</CardDescription>
+        <CardDescription className="line-clamp-2 text-base">{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-3 mb-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-3 mb-4 text-base text-muted-foreground">
           <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
+            <Clock className="h-4 w-4" />
             <span>{duration}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
+            <Users className="h-4 w-4" />
             <span>{participants}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Globe className="h-3.5 w-3.5" />
+            <Globe className="h-4 w-4" />
             <span>{region}</span>
           </div>
         </div>
-        <Button asChild className="w-full bg-logenia-500 hover:bg-logenia-600">
+        <Button asChild className="w-full bg-fluent-primary hover:bg-fluent-600 text-base py-5">
           <Link to={href}>Start Practice</Link>
         </Button>
       </CardContent>
