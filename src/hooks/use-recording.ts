@@ -105,25 +105,29 @@ export function useRecording({
     setAudioChunks([]);
     
     try {
-      // Start audio recording with improved settings for compatibility
+      // Start audio recording with OPTIMAL settings for best Whisper transcription results
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
+          autoGainControl: true,
+          channelCount: 1, // Mono for better speech recognition
+          sampleRate: 44100, // Higher sample rate for quality
         } 
       });
       
-      // Use the most widely supported format
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') 
-        ? 'audio/webm' 
-        : 'audio/mp4';
+      // Use webm format with opus codec which works well with Whisper
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+        ? 'audio/webm;codecs=opus' 
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
       
       console.log(`Using MIME type: ${mimeType} for recording`);
       
       const recorder = new MediaRecorder(stream, { 
         mimeType,
-        audioBitsPerSecond: 128000 // Set a reasonable bitrate
+        audioBitsPerSecond: 128000 // 128 kbps for good audio quality
       });
       
       recorder.ondataavailable = (event) => {
@@ -160,7 +164,7 @@ export function useRecording({
       if (started) {
         toast({
           title: "Recording started",
-          description: "Speak clearly and we'll detect any filler words you use."
+          description: "Speak clearly and we'll analyze your speech with AI."
         });
       }
     } catch (error) {
@@ -191,7 +195,7 @@ export function useRecording({
     
     toast({
       title: "Recording completed",
-      description: "Your speech has been analyzed for filler words."
+      description: "Your speech will now be analyzed with OpenAI."
     });
   };
 

@@ -40,38 +40,11 @@ serve(async (req) => {
       audioData ? (typeof audioData === 'string' ? audioData.length : 'not a string') : 'no audio data');
     console.log("Received transcript:", transcript ? transcript.substring(0, 100) + "..." : 'no transcript');
 
-    if (!audioData || typeof audioData !== 'string') {
-      console.warn("Invalid or missing audio data, using mock response");
-      
-      // Create a mock feedback if we don't have audio data
-      const mockFeedback = {
-        fillerWords: transcript ? countFillerWords(transcript) : [],
-        clarity: 70,
-        pace: "good",
-        structure: 65,
-        suggestions: [
-          "Try to reduce filler words by pausing instead.",
-          "Practice speaking clearly and at a consistent pace."
-        ],
-        summary: "We analyzed your transcript. Practice reducing filler words and keep a consistent pace."
-      };
-      
-      return new Response(
-        JSON.stringify({
-          transcript: transcript || "",
-          feedback: mockFeedback
-        }),
-        {
-          headers: { "Content-Type": "application/json" },
-          status: 200,
-        }
-      );
-    }
-
-    // If we have audioData, use Whisper for transcription
+    // Variable to hold the final transcript
     let finalTranscript = transcript || "";
     let whisperTranscript = null;
-    
+
+    // STEP 1: If we have audioData, use Whisper for transcription
     try {
       if (audioData && audioData.length > 0) {
         // Check if the audioData is a valid base64 string
@@ -109,19 +82,22 @@ serve(async (req) => {
         const transcription = await openai.audio.transcriptions.create({
           file,
           model: "whisper-1",
+          language: "en",
+          response_format: "text",
         });
 
-        console.log("Got transcription from Whisper:", transcription.text.substring(0, 100) + "...");
-        whisperTranscript = transcription.text;
+        console.log("Got transcription from Whisper:", transcription);
+        whisperTranscript = transcription.text || transcription;
         
-        // Use Whisper transcript if it's longer than the provided transcript
-        if (!finalTranscript || whisperTranscript.length > finalTranscript.length) {
+        // Always prefer Whisper transcript if available
+        if (whisperTranscript && whisperTranscript.length > 0) {
+          console.log("Using Whisper transcript as it's available");
           finalTranscript = whisperTranscript;
         }
       }
     } catch (whisperError) {
       console.error("Error with Whisper transcription:", whisperError);
-      // Continue with the original transcript if Whisper fails
+      // Continue with the browser's transcript if Whisper fails
     }
 
     // If we don't have any transcript, use a mock analysis
@@ -150,7 +126,7 @@ serve(async (req) => {
 
     console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100) + "...");
 
-    // Generate AI feedback on the transcript
+    // STEP 2: Generate AI feedback on the transcript using GPT-4o
     const feedbackResponse = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -189,7 +165,7 @@ serve(async (req) => {
     });
 
     const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
-    console.log("Got feedback:", JSON.stringify(feedback).substring(0, 100) + "...");
+    console.log("Got feedback from GPT-4o:", JSON.stringify(feedback).substring(0, 100) + "...");
 
     // Return the transcript and feedback
     return new Response(
@@ -229,22 +205,3 @@ serve(async (req) => {
     );
   }
 });
-
-// Helper function to count filler words in transcript
-function countFillerWords(text: string) {
-  const fillerWords = ["um", "uh", "like", "you know", "sort of", "kind of", "basically", "actually", "literally", "so", "well", "I mean"];
-  const result = [];
-  
-  // Convert to lowercase for case-insensitive matching
-  const lowerText = text.toLowerCase();
-  
-  fillerWords.forEach(word => {
-    const regex = new RegExp(`\\b${word}\\b`, 'gi');
-    const matches = text.match(regex);
-    if (matches && matches.length > 0) {
-      result.push({ word, count: matches.length });
-    }
-  });
-  
-  return result;
-}

@@ -54,6 +54,10 @@ const RecordingControl = ({
       console.log("RecordingControl - Recording complete, audioBlob size:", audioBlob.size, "type:", audioBlob.type);
       if (onRecordingComplete) {
         if (audioBlob.size > 0) {
+          toast({
+            title: "Processing recording",
+            description: "Analyzing your speech with AI...",
+          });
           onRecordingComplete(audioBlob, transcript);
         } else {
           toast({
