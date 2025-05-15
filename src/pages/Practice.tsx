@@ -6,12 +6,15 @@ import RecordingControl from "@/components/RecordingControl";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import CultureTipCard from "@/components/CultureTipCard";
 import RealtimeFeedback from "@/components/RealtimeFeedback";
+import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
+import { professionalScenarios } from "@/data/practiceScenarios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Mic, Info, Book } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -19,12 +22,14 @@ interface FeedbackItem {
 }
 
 const Practice = () => {
+  const { toast } = useToast();
   const [hasRecording, setHasRecording] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [realtimeFeedback, setRealtimeFeedback] = useState<FeedbackItem[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [enableRealtimeCoaching, setEnableRealtimeCoaching] = useState(true);
   const [fillerWordCount, setFillerWordCount] = useState(0);
+  const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   
   const handleRecordingComplete = (audioBlob: Blob) => {
     console.log("Recording completed:", audioBlob);
@@ -50,6 +55,14 @@ const Practice = () => {
     setTimeout(() => {
       setShowFeedback(false);
     }, 8000);
+  };
+
+  const handleScenarioChange = (scenario: Scenario) => {
+    setSelectedScenario(scenario);
+    toast({
+      title: "Scenario Selected",
+      description: `Now practicing: ${scenario.title}`,
+    });
   };
   
   return (
@@ -90,6 +103,13 @@ const Practice = () => {
                         <p className="mt-2">Current filler word count: <span className="font-bold">{fillerWordCount}</span></p>
                       </div>
                     </div>
+                    
+                    {/* Scenario Selector */}
+                    <ScenarioSelector 
+                      scenarios={professionalScenarios}
+                      selectedScenario={selectedScenario}
+                      onScenarioChange={handleScenarioChange}
+                    />
                     
                     <div className="flex items-center justify-between">
                       <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer">
