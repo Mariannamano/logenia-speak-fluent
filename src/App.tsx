@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Practice from "./pages/Practice";
 import Progress from "./pages/Progress";
 import Resources from "./pages/Resources";
+import Rooms from "./pages/Rooms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/practice" element={<Practice />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/rooms" element={<Rooms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </TooltipProvider>
