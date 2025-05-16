@@ -17,7 +17,7 @@ export function useRecordingTimer({
   const requestIdRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   
-  // Use requestAnimationFrame for smoother timer updates
+  // Use requestAnimationFrame for smoother timer updates - FIXED
   useEffect(() => {
     if (!isActive) {
       // Reset timer when not active

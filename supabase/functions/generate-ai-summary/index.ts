@@ -7,7 +7,6 @@
 // supabase secrets set OPENAI_API_KEY=<your_openai_api_key>
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import OpenAI from "https://esm.sh/openai@4.17.0";
 
 // Get the API key from environment variables
 const apiKey = Deno.env.get("OPENAI_API_KEY");
@@ -18,11 +17,6 @@ console.log("API key first 4 chars:", apiKey ? apiKey.substring(0, 4) : "NULL");
 if (!apiKey) {
   console.error("OPENAI_API_KEY is not set in environment variables");
 }
-
-// Initialize the OpenAI client
-const openai = new OpenAI({
-  apiKey: apiKey,
-});
 
 serve(async (req) => {
   try {
@@ -61,41 +55,56 @@ serve(async (req) => {
           audioBytes = audioData.startsWith("data:audio")
             ? Uint8Array.from(atob(audioData.split(",")[1]), (c) => c.charCodeAt(0))
             : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
+          
+          console.log("Converted audio bytes length:", audioBytes.length);
         } catch (error) {
           console.error("Error converting base64 to bytes:", error);
           throw new Error("Failed to process audio data");
         }
 
-        console.log("Converted audio bytes length:", audioBytes.length);
-
         if (audioBytes.length === 0) {
           throw new Error("Empty audio data after conversion");
         }
 
-        // Create file object for OpenAI
+        // Create blob and form data for Whisper API - FIXED
         const blob = new Blob([audioBytes], { type: "audio/webm" });
-// @ts-ignore
-const file = new File([blob], "audio.webm", { type: "audio/webm" });
-
-        console.log("Created file object with size:", file.size);
-
-        if (file.size === 0) {
-          throw new Error("Empty audio file created");
-        }
-
+        const formData = new FormData();
+        formData.append("file", blob, "audio.webm");
+        formData.append("model", "whisper-1");
+        formData.append("language", "en");
+        formData.append("response_format", "text");
+        
+        console.log("Created form data with blob size:", blob.size);
         console.log("Before OpenAI API call. API key exists:", !!apiKey);
+        console.log("API key first 4 chars:", apiKey ? apiKey.substring(0, 4) : "NULL");
         
         try {
-          // Use OpenAI's Whisper model for accurate transcription
-          const transcription = await openai.audio.transcriptions.create({
-            file,
-            model: "whisper-1",
-            language: "en",
-            response_format: "text",
+          // Use fetch directly instead of the SDK - FIXED
+          const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: formData,
           });
+          
+          if (!whisperResponse.ok) {
+            const errorText = await whisperResponse.text();
+            console.error("Whisper API error:", whisperResponse.status, errorText);
+            throw new Error(`Whisper API error: ${whisperResponse.status} - ${errorText}`);
+          }
 
-          console.log("Got transcription from Whisper:", transcription);
-          whisperTranscript = transcription.text || transcription;
+          // Parse the response based on content-type
+          const contentType = whisperResponse.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const jsonResponse = await whisperResponse.json();
+            whisperTranscript = jsonResponse.text || "";
+            console.log("Got JSON transcription from Whisper:", whisperTranscript);
+          } else {
+            // Plain text response
+            whisperTranscript = await whisperResponse.text();
+            console.log("Got plain text transcription from Whisper:", whisperTranscript);
+          }
           
           // Always prefer Whisper transcript if available
           if (whisperTranscript && whisperTranscript.length > 0) {
@@ -141,10 +150,18 @@ const file = new File([blob], "audio.webm", { type: "audio/webm" });
     // STEP 2: Generate AI feedback on the transcript using GPT-4o
     try {
       console.log("Sending to GPT:", finalTranscript);
-      const feedbackResponse = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: `You are a professional speech coach. Output ONLY valid JSON matching:
+      
+      // Use fetch directly instead of the SDK for consistency - FIXED
+      const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: `You are a professional speech coach. Output ONLY valid JSON matching:
 
 {
   "fillerWords": [
@@ -159,12 +176,53 @@ const file = new File([blob], "audio.webm", { type: "audio/webm" });
   ],
   "summary": "<string ending with encouragement>"
 }` },
-          { role: "user", content: finalTranscript }
-        ]
+            { role: "user", content: finalTranscript }
+          ]
+        }),
       });
-
-      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100) + "...");
-      const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
+      
+      if (!gptResponse.ok) {
+        const errorText = await gptResponse.text();
+        console.error("GPT API error:", gptResponse.status, errorText);
+        throw new Error(`GPT API error: ${gptResponse.status} - ${errorText}`);
+      }
+      
+      const gptData = await gptResponse.json();
+      console.log("GPT Response received:", 
+        gptData.choices && gptData.choices[0] ? 
+        gptData.choices[0].message.content.substring(0, 100) + "..." : 
+        "No valid response content");
+      
+      // Safely parse JSON with error handling - FIXED
+      let feedback;
+      try {
+        feedback = JSON.parse(gptData.choices[0].message.content);
+        
+        // Validate feedback structure
+        if (!feedback.fillerWords || !Array.isArray(feedback.fillerWords) || 
+            typeof feedback.clarity !== 'number' || 
+            typeof feedback.pace !== 'string' || 
+            typeof feedback.structure !== 'number' || 
+            !Array.isArray(feedback.suggestions) || 
+            typeof feedback.summary !== 'string') {
+          throw new Error("Invalid feedback format");
+        }
+        
+        console.log("Successfully parsed feedback:", JSON.stringify(feedback).substring(0, 100) + "...");
+      } catch (parseError) {
+        console.error("Error parsing GPT response:", parseError);
+        console.error("Raw GPT content:", gptData.choices[0].message.content);
+        
+        // Provide fallback feedback
+        feedback = {
+          fillerWords: [],
+          clarity: 60,
+          pace: "good",
+          structure: 60,
+          suggestions: ["Try to be more specific and detailed in your speech.", "Practice with a clearer structure."],
+          summary: "Your speech was analyzed, but we had trouble processing the full AI feedback. Keep practicing!"
+        };
+      }
 
       // Return the transcript and feedback
       return new Response(
