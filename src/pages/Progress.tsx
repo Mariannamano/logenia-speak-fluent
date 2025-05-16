@@ -2,10 +2,12 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, BarChart2Icon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { usePracticeStats } from "@/hooks/use-practice-stats";
+import ProgressShelf from "@/components/progress/ProgressShelf";
 
 // Mock data for progress charts
 const weeklyData = [
@@ -59,6 +61,19 @@ const practiceHistory = [
 ];
 
 const Progress = () => {
+  const { stats } = usePracticeStats();
+  
+  // Format total practice time
+  const formatPracticeTime = (totalMinutes: number) => {
+    if (totalMinutes < 60) {
+      return `${totalMinutes.toFixed(1)} mins`;
+    } else {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = Math.round(totalMinutes % 60);
+      return `${hours}.${minutes < 10 ? '0' : ''}${minutes} hours`;
+    }
+  };
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -72,22 +87,34 @@ const Progress = () => {
             </p>
           </div>
           
+          {/* Progress Shelf Component */}
+          <div className="mb-8">
+            <ProgressShelf 
+              streak={stats.streak}
+              totalSessions={stats.totalSessions}
+              achievements={stats.achievements}
+              level={stats.level}
+              xp={stats.xp}
+              nextLevelXp={stats.nextLevelXp}
+            />
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <StatCard 
               title="Total Practice Time" 
-              value="4.2 hours"
-              description="Last 30 days" 
+              value={formatPracticeTime(stats.totalPracticeTime)}
+              description="All time" 
               icon={<CalendarIcon className="text-logenia-500" />}
             />
             <StatCard 
               title="Overall Progress" 
-              value="+18%"
+              value={`${Math.min(stats.level * 5, 100)}%`}
               description="Improvement from baseline" 
               icon={<BarChart2Icon className="text-accent" />}
             />
             <StatCard 
               title="Current Streak" 
-              value="5 days"
+              value={`${stats.streak} days`}
               description="Keep practicing!" 
               icon={<TrophyIcon className="text-amber-500" />}
             />
@@ -189,7 +216,7 @@ const Progress = () => {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 text-center text-sm text-muted-foreground">
-                  Based on your last 10 practice sessions
+                  Based on your last {stats.totalSessions} practice sessions
                 </div>
               </CardContent>
             </Card>

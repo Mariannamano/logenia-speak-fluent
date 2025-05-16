@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
@@ -7,6 +8,7 @@ import AnalysisError from "@/components/practice/AnalysisError";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import { SpeechAnalysis, analyzeRecording } from "@/services/coachingService";
 import { toast } from "@/hooks/use-toast";
+import { usePracticeStats } from "@/hooks/use-practice-stats";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -28,6 +30,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [culturalContext, setCulturalContext] = useState("united-states"); // Default to US
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const { recordPracticeSession } = usePracticeStats();
   
   const handleTranscriptUpdate = (transcript: string) => {
     setCurrentTranscript(transcript);
@@ -83,6 +87,9 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
           (sum, item) => sum + item.count, 0
         );
         setFillerWordCount(prev => prev + totalFillerWords);
+        
+        // Record the completed practice session
+        recordPracticeSession(recordingDuration);
         
         // Success notification
         toast({
@@ -142,6 +149,11 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
     });
   };
   
+  // Track the recording duration
+  const handleDurationUpdate = (durationInSeconds: number) => {
+    setRecordingDuration(durationInSeconds);
+  };
+  
   // Add debug log to check transcript visibility
   useEffect(() => {
     if (hasRecording) {
@@ -162,6 +174,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
               onRecordingComplete={handleRecordingComplete}
               onTranscriptUpdate={handleTranscriptUpdate}
               onFeedbackUpdate={handleFeedbackUpdate}
+              onDurationUpdate={handleDurationUpdate}
               currentTranscript={currentTranscript}
               enableRealtimeCoaching={enableRealtimeCoaching}
               setEnableRealtimeCoaching={setEnableRealtimeCoaching}

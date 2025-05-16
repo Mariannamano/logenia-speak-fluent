@@ -16,6 +16,7 @@ interface RecordingControlProps {
   onTranscriptUpdate?: (transcript: string) => void;
   onFeedbackUpdate?: (feedback: FeedbackItem[]) => void;
   enableRealtimeFeedback?: boolean;
+  onDurationUpdate?: (durationInSeconds: number) => void;
 }
 
 const RecordingControl = ({ 
@@ -23,7 +24,8 @@ const RecordingControl = ({
   maxDuration = 60,
   onTranscriptUpdate,
   onFeedbackUpdate,
-  enableRealtimeFeedback = true
+  enableRealtimeFeedback = true,
+  onDurationUpdate
 }: RecordingControlProps) => {
   // Check for browser compatibility
   useEffect(() => {
@@ -59,6 +61,11 @@ const RecordingControl = ({
             description: "Analyzing your speech with AI...",
           });
           onRecordingComplete(audioBlob, transcript);
+          
+          // Report final duration
+          if (onDurationUpdate) {
+            onDurationUpdate(elapsedTime);
+          }
         } else {
           toast({
             title: "Recording Error",
@@ -70,6 +77,13 @@ const RecordingControl = ({
     },
     enableRealtimeFeedback
   });
+  
+  // Update duration while recording
+  useEffect(() => {
+    if (isListening && onDurationUpdate) {
+      onDurationUpdate(elapsedTime);
+    }
+  }, [elapsedTime, isListening, onDurationUpdate]);
 
   return (
     <div className="flex flex-col gap-4">
