@@ -7,7 +7,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
 import { FeedbackItem } from "@/services/coachingService";
-import { Scenario } from "@/data/practiceScenarios"; // Import the Scenario type
+
+// Define a local Scenario interface since it's not exported from practiceScenarios
+interface Scenario {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  prompts: string[];
+}
 
 interface PracticeControlsProps {
   onRecordingComplete: (audioBlob: Blob, transcript: string) => void;

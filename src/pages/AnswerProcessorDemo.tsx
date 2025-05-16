@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { AnswerProcessor } from "@/components/AnswerProcessor";
+import AnswerProcessor from "@/components/AnswerProcessor";
 
 const AnswerProcessorDemo = () => {
   const [isProcessing, setIsProcessing] = useState(false);

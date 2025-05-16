@@ -1,3 +1,4 @@
+
 export interface FeedbackItem {
   id: string;
   type: 'filler_word' | 'pace' | 'clarity' | 'grammar' | 'vocabulary' | 'suggestion';
@@ -5,6 +6,20 @@ export interface FeedbackItem {
   timestamp: number;
   suggestion?: string;
   severity?: 'low' | 'medium' | 'high';
+}
+
+export interface FillerWordItem {
+  word: string;
+  count: number;
+}
+
+export interface SpeechAnalysis {
+  fillerWords: FillerWordItem[];
+  clarity: number;
+  pace: 'slow' | 'good' | 'fast';
+  structure: number;
+  suggestions: string[];
+  summary: string;
 }
 
 export const analyzeSpeech = async (transcript: string): Promise<FeedbackItem[]> => {
@@ -74,4 +89,42 @@ export const getRealtimeFeedback = (transcript: string): FeedbackItem[] => {
   }
   
   return feedback;
+};
+
+// Add the missing analyzeRecording function
+export const analyzeRecording = async (
+  audioBlob: Blob, 
+  transcript: string, 
+  culturalContext: string
+): Promise<{
+  transcript: string;
+  feedback: SpeechAnalysis;
+}> => {
+  // For now, this is a mock implementation
+  console.log(`Analyzing recording with cultural context: ${culturalContext}`);
+  console.log(`Audio size: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Mock response
+  return {
+    transcript: transcript, // In a real implementation, this might be replaced with a more accurate transcript
+    feedback: {
+      fillerWords: [
+        { word: "um", count: 5 },
+        { word: "like", count: 3 },
+        { word: "you know", count: 2 }
+      ],
+      clarity: 75,
+      pace: "good",
+      structure: 80,
+      suggestions: [
+        "Try to eliminate filler words for clearer speech",
+        "Consider providing more concrete examples",
+        "Use more varied vocabulary for greater impact"
+      ],
+      summary: "Overall, your speech was clear and well-structured, but could be improved by reducing filler words."
+    }
+  };
 };

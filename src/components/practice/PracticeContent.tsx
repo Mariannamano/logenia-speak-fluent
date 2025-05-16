@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PracticeMain from "@/components/practice/PracticeMain";
 import PracticeAnalysis from "@/components/practice/PracticeAnalysis";
@@ -120,7 +119,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   
   const handleFeedbackUpdate = (feedback: FeedbackItem[]) => {
     // Count filler word feedback items
-    const newFillerWords = feedback.filter(item => item.type === "filler").length;
+    const newFillerWords = feedback.filter(item => item.type === "filler_word").length;
     if (newFillerWords > 0) {
       setFillerWordCount(prev => prev + newFillerWords);
     }
