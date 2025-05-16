@@ -1,12 +1,7 @@
 
 import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowRight } from "lucide-react";
-
-interface FeedbackItem {
-  type: "filler" | "followup";
-  content: string;
-}
+import { FeedbackItem } from "@/services/coachingService";
 
 interface RealtimeFeedbackProps {
   feedback: FeedbackItem[];
@@ -30,12 +25,10 @@ const RealtimeFeedback: React.FC<RealtimeFeedbackProps> = ({
         <AlertDescription className="space-y-2 pt-2">
           {feedback.map((item, index) => (
             <div key={index} className="flex items-start gap-2 text-sm">
-              {item.type === "filler" ? (
-                <span className="text-amber-600 font-medium flex-shrink-0">Filler:</span>
-              ) : (
-                <span className="text-green-600 font-medium flex-shrink-0">Follow-up:</span>
-              )}
-              <span>{item.content}</span>
+              <span className={`${item.type === 'filler_word' ? 'text-amber-600' : 'text-green-600'} font-medium flex-shrink-0`}>
+                {item.type === 'filler_word' ? 'Filler:' : 'Suggestion:'}
+              </span>
+              <span>{item.text}</span>
             </div>
           ))}
         </AlertDescription>
