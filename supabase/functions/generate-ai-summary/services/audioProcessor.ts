@@ -32,9 +32,10 @@ export async function processAudio(audioData: string, apiKey: string | undefined
 
   // Create blob and form data for Whisper API
   const blob = new Blob([audioBytes], { type: "audio/webm" });
-  const formData = new FormData();
- // @ts-ignore
+// @ts-ignore
 const file = new File([blob], "audio.webm", { type: "audio/webm" });
+
+const formData = new FormData();
 formData.append("file", file);
   formData.append("model", "whisper-1");
   formData.append("language", "en");
