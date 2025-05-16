@@ -31,7 +31,7 @@ serve(async (req) => {
       requestBody = await req.json();
     } catch (error) {
       console.error("Error parsing request body:", error);
-      throw new Error("Invalid request body");
+      throw new Error("Invalid request body: " + (error instanceof Error ? error.message : String(error)));
     }
 
     const { audioData, transcript } = requestBody;
@@ -49,7 +49,7 @@ serve(async (req) => {
       if (audioData && audioData.length > 0) {
         // Check if the audioData is a valid base64 string
         if (!audioData.startsWith("data:audio") && !audioData.includes("base64")) {
-          throw new Error("Invalid audio data format");
+          throw new Error("Invalid audio data format: Audio data must be a base64-encoded string with data URI prefix");
         }
 
         // Convert base64 to Uint8Array
@@ -60,7 +60,7 @@ serve(async (req) => {
             : Uint8Array.from(atob(audioData), (c) => c.charCodeAt(0));
         } catch (error) {
           console.error("Error converting base64 to bytes:", error);
-          throw new Error("Failed to process audio data");
+          throw new Error("Failed to process audio data: " + (error instanceof Error ? error.message : String(error)));
         }
 
         console.log("Converted audio bytes length:", audioBytes.length);
@@ -78,26 +78,36 @@ serve(async (req) => {
           throw new Error("Empty audio file created");
         }
 
-        // Use OpenAI's Whisper model for accurate transcription
-        const transcription = await openai.audio.transcriptions.create({
-          file,
-          model: "whisper-1",
-          language: "en",
-          response_format: "text",
-        });
+        try {
+          // Use OpenAI's Whisper model for accurate transcription
+          const transcription = await openai.audio.transcriptions.create({
+            file,
+            model: "whisper-1",
+            language: "en",
+            response_format: "text",
+          });
 
-        console.log("Got transcription from Whisper:", transcription);
-        whisperTranscript = transcription.text || transcription;
-        
-        // Always prefer Whisper transcript if available
-        if (whisperTranscript && whisperTranscript.length > 0) {
-          console.log("Using Whisper transcript as it's available");
-          finalTranscript = whisperTranscript;
+          console.log("Got transcription from Whisper:", transcription);
+          whisperTranscript = transcription.text || transcription;
+          
+          // Always prefer Whisper transcript if available
+          if (whisperTranscript && whisperTranscript.length > 0) {
+            console.log("Using Whisper transcript as it's available");
+            finalTranscript = whisperTranscript;
+          }
+        } catch (whisperSpecificError) {
+          console.error("Whisper API specific error:", whisperSpecificError);
+          throw new Error("Error transcribing audio with Whisper API: " + 
+            (whisperSpecificError instanceof Error ? whisperSpecificError.message : String(whisperSpecificError)));
         }
       }
     } catch (whisperError) {
       console.error("Error with Whisper transcription:", whisperError);
       // Continue with the browser's transcript if Whisper fails
+      if (!finalTranscript || finalTranscript.trim().length < 10) {
+        throw new Error("Whisper transcription failed and browser transcript is too short: " + 
+          (whisperError instanceof Error ? whisperError.message : String(whisperError)));
+      }
     }
 
     // More robust transcript checking
@@ -182,20 +192,21 @@ serve(async (req) => {
       );
     } catch (gptError) {
       console.error("Error with GPT analysis:", gptError);
-      throw new Error("Failed to analyze speech with GPT: " + gptError.message);
+      throw new Error("Failed to analyze speech with GPT: " + 
+        (gptError instanceof Error ? gptError.message : String(gptError)));
     }
   } catch (error) {
     console.error("Error processing request:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     
-    // Create fallback feedback
+    // Create fallback feedback with more detailed error information
     const fallbackFeedback = {
       fillerWords: [],
       clarity: 50,
       pace: "good",
       structure: 50,
-      suggestions: ["There was an error analyzing your speech. Please try again with a clearer recording."],
-      summary: "We couldn't fully analyze your speech. Try speaking clearly into your microphone and ensure you have a good internet connection."
+      suggestions: [`There was an error analyzing your speech: ${errorMessage}. Please try again.`],
+      summary: "We encountered an issue during analysis. This might be due to API connectivity issues or invalid audio data. Please try again with a clearer recording."
     };
     
     return new Response(
