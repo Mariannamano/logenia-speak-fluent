@@ -130,6 +130,14 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
     onFeedbackUpdate(feedback);
   };
   
+  // Add debug log to check transcript visibility
+  useEffect(() => {
+    if (hasRecording) {
+      console.log("Recording completed, transcript should be visible:", completeTranscript);
+      console.log("Has speech analysis:", !!speechAnalysis);
+    }
+  }, [hasRecording, completeTranscript, speechAnalysis]);
+  
   return (
     <div className="container px-4 md:px-6 max-w-4xl mx-auto">
       {/* Main Practice Area */}
@@ -155,18 +163,22 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
       {/* Error message if analysis failed */}
       <AnalysisError error={analysisError} />
       
-      {/* Complete Transcript appears after recording */}
-      <TranscriptDisplay 
-        transcript={completeTranscript} 
-        hasRecording={hasRecording} 
-      />
-      
-      {/* Feedback appears after recording */}
+      {/* Complete Transcript appears after recording - forcing display for testing */}
       {hasRecording && (
-        <FeedbackPanel 
-          analysis={speechAnalysis} 
-          isLoading={isAnalyzing} 
+        <TranscriptDisplay 
+          transcript={completeTranscript} 
+          hasRecording={true} 
         />
+      )}
+      
+      {/* Feedback appears after recording - forcing display for testing */}
+      {hasRecording && (
+        <div id="feedback-panel-container" className="mb-8">
+          <FeedbackPanel 
+            analysis={speechAnalysis} 
+            isLoading={isAnalyzing} 
+          />
+        </div>
       )}
     </div>
   );
