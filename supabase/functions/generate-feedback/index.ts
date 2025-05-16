@@ -12,27 +12,32 @@ if (!OPENAI_API_KEY) {
 const culturalGuidelines = {
   "united-states": "In American culture, communication is typically direct, efficient, and action-oriented. " +
     "Prioritize brevity, clarity, and confident delivery. Filler words are generally perceived negatively. " +
-    "Ideal speech pace is moderate to slightly fast. Structure should be clear with main points stated upfront.",
+    "Ideal speech pace is moderate to slightly fast. Structure should be clear with main points stated upfront. " +
+    "IMPORTANT: Make explicit references to American communication style in your feedback summary and suggestions.",
 
   "japan": "In Japanese culture, communication values thoughtfulness, harmony, and implicit understanding. " +
     "Pauses are considered thoughtful rather than awkward. A moderate to slower pace is appropriate. " + 
     "Some filler words may be acceptable as they show consideration. Structure should build context before conclusions. " +
-    "Directness should be balanced with politeness and maintaining group harmony.",
+    "Directness should be balanced with politeness and maintaining group harmony. " +
+    "IMPORTANT: Make explicit references to Japanese communication style in your feedback summary and suggestions.",
   
   "spain": "In Spanish culture, communication is often passionate, expressive, and relationship-oriented. " +
     "Animated delivery with varied tone and gestures is appreciated. A moderate to faster pace is common. " +
     "Some filler words or repetition for emphasis is tolerated. Structure can be flexible and storytelling " +
-    "is valued. Expressiveness and emotional connection are important.",
+    "is valued. Expressiveness and emotional connection are important. " +
+    "IMPORTANT: Make explicit references to Spanish communication style in your feedback summary and suggestions.",
   
   "germany": "In German culture, communication values precision, thoroughness, and factual content. " +
     "Be detailed, logical, and well-prepared. A moderate, measured pace is appropriate. " +
     "Minimal filler words are expected. Structure should be highly organized with clear supporting evidence. " +
-    "Directness is appreciated when backed by expertise or data.",
+    "Directness is appreciated when backed by expertise or data. " +
+    "IMPORTANT: Make explicit references to German communication style in your feedback summary and suggestions.",
   
   "india": "In Indian culture, communication often balances directness with contextual storytelling. " +
     "A moderate pace with rhetorical flourishes is common. Some repetition for emphasis is acceptable. " +
     "Structure should establish relationships and context before addressing core points. " +
-    "Respect-oriented phrasing is important, especially with senior colleagues."
+    "Respect-oriented phrasing is important, especially with senior colleagues. " +
+    "IMPORTANT: Make explicit references to Indian communication style in your feedback summary and suggestions."
 };
 
 serve(async (req) => {
@@ -69,6 +74,8 @@ serve(async (req) => {
           
 ${cultureGuideline}
 
+In every section of your feedback, specifically mention how your feedback relates to ${culturalContext.replace("-", " ")} communication norms.
+
 Based on these cultural norms, analyze the speech transcript and output ONLY valid JSON matching:
 
 {
@@ -79,10 +86,10 @@ Based on these cultural norms, analyze the speech transcript and output ONLY val
   "pace": "<too slow|good|too fast>",
   "structure": <integer 0–100>,
   "suggestions": [
-    "<string>",
-    "<string>"
+    "<string that explicitly references ${culturalContext.replace("-", " ")} communication standards>",
+    "<string that explicitly references ${culturalContext.replace("-", " ")} communication standards>"
   ],
-  "summary": "<string ending with encouragement>"
+  "summary": "<string that includes explicit references to ${culturalContext.replace("-", " ")} communication norms and ends with encouragement>"
 }` },
           { role: "user", content: transcript }
         ]
@@ -127,7 +134,9 @@ Based on these cultural norms, analyze the speech transcript and output ONLY val
       console.error("Error parsing GPT response:", parseError);
       console.error("Raw GPT content:", gptData.choices[0].message.content);
       
-      // Provide fallback feedback
+      // Provide fallback feedback with cultural context references
+      const cultureName = culturalContext.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      
       return new Response(
         JSON.stringify({
           feedback: {
@@ -135,8 +144,11 @@ Based on these cultural norms, analyze the speech transcript and output ONLY val
             clarity: 60,
             pace: "good",
             structure: 60,
-            suggestions: ["Try to be more specific and detailed in your speech.", "Practice with a clearer structure."],
-            summary: "Your speech was analyzed, but we had trouble processing the full AI feedback. Keep practicing!"
+            suggestions: [
+              `For effective ${cultureName} communication, try to be more specific and detailed in your speech.`,
+              `Consider adapting your pace to better match ${cultureName} expectations for professional speech.`
+            ],
+            summary: `Your speech was analyzed using ${cultureName} communication standards. While we had trouble processing the full AI feedback, the structure and clarity could be improved to better align with ${cultureName} communication norms. Keep practicing with these cultural expectations in mind!`
           }
         }),
         {
@@ -147,6 +159,11 @@ Based on these cultural norms, analyze the speech transcript and output ONLY val
     }
   } catch (error) {
     console.error("Feedback generation error:", error);
+    
+    // Get culture name from context ID for the fallback message
+    const culturalContext = (await req.json())?.culturalContext || "united-states";
+    const cultureName = culturalContext.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : "Unknown error",
@@ -155,8 +172,11 @@ Based on these cultural norms, analyze the speech transcript and output ONLY val
           clarity: 50,
           pace: "good",
           structure: 50,
-          suggestions: ["There was an error analyzing your speech. Please try again with a clearer recording."],
-          summary: "We couldn't fully analyze your speech. Try speaking clearly into your microphone and ensure you have a good internet connection."
+          suggestions: [
+            `There was an error analyzing your speech against ${cultureName} communication standards. Please try again with a clearer recording.`,
+            `For ${cultureName} speaking contexts, ensure you're speaking clearly and at an appropriate pace.`
+          ],
+          summary: `We couldn't fully analyze your speech using ${cultureName} communication norms. Try speaking clearly into your microphone and ensure you have a good internet connection. Remember that different cultures have different expectations for effective communication.`
         }
       }),
       {

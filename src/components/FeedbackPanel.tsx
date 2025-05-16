@@ -2,15 +2,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, AlertCircle, Info, Clock, VolumeIcon, BarChart } from "lucide-react";
+import { CheckCircle, AlertCircle, Info, Clock, VolumeIcon, BarChart, Globe } from "lucide-react";
 import { SpeechAnalysis } from "@/services/coachingService";
+import { cultures } from "@/components/practice/CulturalContextSelector";
 
 interface FeedbackPanelProps {
   analysis?: SpeechAnalysis;
   isLoading?: boolean;
+  culturalContext?: string;
 }
 
-const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
+const FeedbackPanel = ({ analysis, isLoading = false, culturalContext = "united-states" }: FeedbackPanelProps) => {
+  // Find the culture object for the current context
+  const currentCulture = cultures.find(c => c.id === culturalContext) || cultures[0];
+  
   if (isLoading) {
     return (
       <Card className="w-full">
@@ -36,15 +41,23 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          Speech Analysis
-          <Badge variant="outline" className="ml-2">
-            <Info className="h-3.5 w-3.5 mr-1" />
-            AI Coach
+        <CardTitle className="flex items-center justify-between text-xl">
+          <span className="flex items-center gap-2">
+            Speech Analysis
+            <Badge variant="outline" className="ml-2">
+              <Info className="h-3.5 w-3.5 mr-1" />
+              AI Coach
+            </Badge>
+          </span>
+          
+          {/* Cultural context badge */}
+          <Badge variant="outline" className="bg-muted/50">
+            <Globe className="h-3.5 w-3.5 mr-1" />
+            {currentCulture.name} Context
           </Badge>
         </CardTitle>
         <CardDescription className="text-lg">
-          Review your speech performance and areas for improvement
+          Review your speech performance based on {currentCulture.name} communication norms
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -67,7 +80,7 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
               <StatCard 
                 title="Pacing" 
                 value={analysis.pace} 
-                description="Speech rhythm" 
+                description={`For ${currentCulture.name} style`}
                 icon={<Clock className={analysis.pace === "good" ? "text-green-500" : "text-amber-500"} />} 
               />
               <StatCard 
@@ -79,7 +92,16 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
             </div>
             
             <div className="mt-6">
-              <h4 className="font-medium mb-2 text-lg">Summary</h4>
+              <h4 className="font-medium mb-2 text-lg flex items-center gap-2">
+                <span>Cultural Context Feedback</span>
+                <Globe className="h-4 w-4 text-muted-foreground" />
+              </h4>
+              <div className="p-4 border rounded-md bg-muted/20">
+                <p className="text-base">
+                  <span className="font-medium">{currentCulture.name} communication norms:</span> {currentCulture.description}
+                </p>
+              </div>
+              <h4 className="font-medium mb-2 mt-4 text-lg">Summary</h4>
               <p className="text-base text-muted-foreground">
                 {analysis.summary}
               </p>
@@ -93,6 +115,9 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
                   <h4 className="font-medium mb-2 flex items-center text-lg">
                     <AlertCircle className="h-4 w-4 mr-2 text-amber-500" />
                     Filler Words
+                    <span className="text-sm font-normal ml-2 text-muted-foreground">
+                      (Based on {currentCulture.name} standards)
+                    </span>
                   </h4>
                   <div className="flex gap-2 flex-wrap ml-4">
                     {analysis.fillerWords.map((item, index) => (
@@ -106,7 +131,15 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
                     ))}
                   </div>
                   <p className="mt-2 ml-4 text-base text-muted-foreground">
-                    Try to replace these words with brief pauses to sound more confident and clear.
+                    {currentCulture.id === "japan" ? 
+                      "In Japanese communication, some pauses and fillers can indicate thoughtfulness, but excessive use may still distract listeners." :
+                      currentCulture.id === "spain" ? 
+                      "In Spanish communication, some filler words can add expressiveness, but clarity should still be maintained." :
+                      currentCulture.id === "germany" ? 
+                      "In German communication, precision is valued, and filler words should be minimized for clarity." :
+                      currentCulture.id === "india" ? 
+                      "In Indian communication, some repetition for emphasis is acceptable, but excessive fillers may reduce impact." :
+                      "Try to replace these words with brief pauses to sound more confident and clear."}
                   </p>
                 </section>
               )}
@@ -129,10 +162,10 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
                 </div>
                 <p className="text-base text-muted-foreground mt-2 ml-4">
                   {analysis.clarity > 80 
-                    ? "Your speech was very clear and easy to understand."
+                    ? `Your speech was very clear and easy to understand, aligning well with ${currentCulture.name} communication expectations.`
                     : analysis.clarity > 60
-                      ? "Your speech was generally clear with room for improvement."
-                      : "Focus on speaking more clearly by slowing down and enunciating."}
+                      ? `Your speech was generally clear with room for improvement. In ${currentCulture.name} contexts, ${currentCulture.id === "united-states" ? "brevity and directness are" : currentCulture.id === "japan" ? "thoughtful delivery is" : currentCulture.id === "spain" ? "expressiveness is" : currentCulture.id === "germany" ? "precision and thoroughness are" : "balance of detail and respect are"} appreciated.`
+                      : `Focus on speaking more clearly to meet ${currentCulture.name} communication expectations by ${currentCulture.id === "united-states" ? "being direct and concise" : currentCulture.id === "japan" ? "being measured and considerate" : currentCulture.id === "spain" ? "being engaging but clear" : currentCulture.id === "germany" ? "being precise and thorough" : "balancing context with core points"}.`}
                 </p>
               </section>
               
@@ -154,10 +187,10 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
                 </div>
                 <p className="text-base text-muted-foreground mt-2 ml-4">
                   {analysis.structure > 80 
-                    ? "Your ideas were well-structured and flowed logically."
+                    ? `Your ideas were well-structured and flowed logically, meeting ${currentCulture.name} expectations for ${currentCulture.id === "united-states" ? "direct and organized" : currentCulture.id === "japan" ? "thoughtful and harmonious" : currentCulture.id === "spain" ? "engaging and flowing" : currentCulture.id === "germany" ? "precise and thorough" : "contextual and respectful"} communication.`
                     : analysis.structure > 60
-                      ? "Your structure was decent but could be more cohesive."
-                      : "Try organizing your thoughts with a clearer beginning, middle, and end."}
+                      ? `Your structure was decent but could be more ${currentCulture.id === "united-states" ? "direct and concise" : currentCulture.id === "japan" ? "building context before conclusions" : currentCulture.id === "spain" ? "expressive with good flow" : currentCulture.id === "germany" ? "logically organized with supporting evidence" : "balanced between context and core points"}.`
+                      : `Try organizing your thoughts with a ${currentCulture.id === "united-states" ? "clearer beginning, middle, and end with main points upfront" : currentCulture.id === "japan" ? "more contextual introduction that builds to your conclusions" : currentCulture.id === "spain" ? "more engaging narrative structure with emotional connection" : currentCulture.id === "germany" ? "more logical sequence with clear supporting evidence" : "better balance of contextual information and core message"}.`}
                 </p>
               </section>
             </div>
@@ -166,7 +199,12 @@ const FeedbackPanel = ({ analysis, isLoading = false }: FeedbackPanelProps) => {
           <TabsContent value="suggestions">
             <div className="space-y-4 mt-4">
               <h4 className="font-medium mb-2 text-lg">Improvement Suggestions</h4>
-              
+              <div className="p-3 bg-muted/30 rounded-md mb-4">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Suggestions are tailored to {currentCulture.name} communication style
+                </p>
+              </div>
               <div className="space-y-3">
                 {analysis.suggestions.map((suggestion, index) => (
                   <SuggestionItem 

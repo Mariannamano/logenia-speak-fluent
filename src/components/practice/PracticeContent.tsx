@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
@@ -134,6 +133,13 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const handleCultureChange = (cultureId: string) => {
     setCulturalContext(cultureId);
     console.log("Cultural context updated to:", cultureId);
+    
+    // Add a toast notification to confirm the cultural context change
+    const cultureName = cultureId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    toast({
+      title: "Cultural Context Updated",
+      description: `Feedback will now be tailored to ${cultureName} communication norms.`
+    });
   };
   
   // Add debug log to check transcript visibility
@@ -171,7 +177,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
       {/* Error message if analysis failed */}
       <AnalysisError error={analysisError} />
       
-      {/* Complete Transcript appears after recording - forcing display for testing */}
+      {/* Complete Transcript appears after recording */}
       {hasRecording && (
         <TranscriptDisplay 
           transcript={completeTranscript} 
@@ -179,12 +185,13 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
         />
       )}
       
-      {/* Feedback appears after recording - forcing display for testing */}
+      {/* Feedback appears after recording - now passing culturalContext */}
       {hasRecording && (
         <div id="feedback-panel-container" className="mb-8">
           <FeedbackPanel 
             analysis={speechAnalysis} 
             isLoading={isAnalyzing} 
+            culturalContext={culturalContext}
           />
         </div>
       )}
