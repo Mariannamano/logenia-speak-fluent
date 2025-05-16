@@ -163,7 +163,13 @@ serve(async (req) => {
             content: finalTranscript
           }
         ],
-        response_format: { type: "json_object" }
+      const feedbackResponse = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    { role: "system", content: "..." },
+    { role: "user", content: finalTranscript }
+  ]
+});
       });
 
       console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100) + "...");
