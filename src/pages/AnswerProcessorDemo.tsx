@@ -1,30 +1,33 @@
 
-import React from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AnswerProcessor from "@/components/AnswerProcessor";
+import { useState } from "react";
+import { AnswerProcessor } from "@/components/AnswerProcessor";
 
 const AnswerProcessorDemo = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [answer, setAnswer] = useState("");
+  const [question] = useState("Tell me about your experience with public speaking.");
+
+  const handleSubmit = async (answer: string) => {
+    setIsProcessing(true);
+    console.log("Submitted answer:", answer);
+    
+    // Simulate processing
+    setTimeout(() => {
+      setAnswer(answer);
+      setIsProcessing(false);
+    }, 1500);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Answer Processor Demo</h1>
       
-      <main className="flex-1 container max-w-4xl mx-auto px-4 py-8">
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">Answer Processor Demo</CardTitle>
-            <CardDescription>
-              Record your answer to a question and receive AI feedback on your speech.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AnswerProcessor />
-          </CardContent>
-        </Card>
-      </main>
-      
-      <Footer />
+      <AnswerProcessor
+        question={question}
+        answer={answer}
+        isProcessing={isProcessing}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

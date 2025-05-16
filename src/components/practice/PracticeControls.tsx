@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
 import { FeedbackItem } from "@/services/coachingService";
+import { Scenario } from "@/data/practiceScenarios"; // Import the Scenario type
 
 interface PracticeControlsProps {
   onRecordingComplete: (audioBlob: Blob, transcript: string) => void;
@@ -37,7 +38,7 @@ const PracticeControls = ({
 }: PracticeControlsProps) => {
   const [selectedScenario, setSelectedScenario] = useState<string | null>(initialCategory);
   
-  const handleScenarioChange = (scenario: any) => {
+  const handleScenarioChange = (scenario: Scenario) => {
     setSelectedScenario(scenario.id);
     console.log("Selected scenario:", scenario.id);
   };
