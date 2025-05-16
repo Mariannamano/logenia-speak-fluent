@@ -1,10 +1,15 @@
+
 import { useState } from "react";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useRecordingTimer } from "@/hooks/use-recording-timer";
 import { useRealtimeFeedback } from "@/hooks/use-realtime-feedback";
 import { toast } from "@/hooks/use-toast";
-import { FeedbackItem } from "@/services/coachingService";
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
+}
 
 interface UseRecordingProps {
   maxDuration?: number;

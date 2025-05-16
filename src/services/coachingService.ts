@@ -1,130 +1,168 @@
 
-export interface FeedbackItem {
-  id: string;
-  type: 'filler_word' | 'pace' | 'clarity' | 'grammar' | 'vocabulary' | 'suggestion';
-  text: string;
-  timestamp: number;
-  suggestion?: string;
-  severity?: 'low' | 'medium' | 'high';
+import axios from 'axios';
+
+// Using Vite's import.meta.env instead of process.env
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8000';
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
 }
 
-export interface FillerWordItem {
-  word: string;
-  count: number;
-}
-
+// Speech analysis feedback from AI
 export interface SpeechAnalysis {
-  fillerWords: FillerWordItem[];
+  fillerWords: { word: string; count: number }[];
   clarity: number;
-  pace: 'slow' | 'good' | 'fast';
+  pace: string; // "too slow", "good", or "too fast"
   structure: number;
   suggestions: string[];
   summary: string;
 }
 
-export const analyzeSpeech = async (transcript: string): Promise<FeedbackItem[]> => {
-  // This would normally call an API, but for now we'll use mock data
-  const feedback: FeedbackItem[] = [];
-  
-  // Check for filler words
-  const fillerWords = ['um', 'uh', 'like', 'you know', 'actually', 'basically'];
-  const words = transcript.toLowerCase().split(' ');
-  
-  words.forEach((word, index) => {
-    if (fillerWords.includes(word)) {
+// This function would normally call an API, but for now we'll implement filler word detection locally
+export async function getRealtimeFeedback(text: string): Promise<FeedbackItem[]> {
+  try {
+    // For demo purposes, we're detecting filler words locally
+    // In a production app, this would call your backend API
+    const fillerWords = ["um", "uh", "like", "you know", "sort of", "kind of", "basically", "actually", "literally", "so", "well", "I mean"];
+    const feedback: FeedbackItem[] = [];
+    
+    // Convert text to lowercase for case-insensitive matching
+    const lowerText = text.toLowerCase();
+    
+    // Check for filler words
+    fillerWords.forEach(word => {
+      if (lowerText.includes(word)) {
+        feedback.push({
+          type: "filler",
+          content: `You used the filler word "${word}". Try to be more confident in your speech.`
+        });
+      }
+    });
+    
+    // Add a follow-up suggestion if we found filler words
+    if (feedback.length > 0) {
       feedback.push({
-        id: `filler-${index}`,
-        type: 'filler_word',
-        text: word,
-        timestamp: index * 500, // Rough timestamp estimation
-        suggestion: 'Try to eliminate filler words for clearer speech',
-        severity: 'medium'
+        type: "followup",
+        content: "Try pausing instead of using filler words. Silence is better than fillers."
       });
     }
-  });
-  
-  // Add some mock feedback items
-  if (transcript.length > 50) {
-    feedback.push({
-      id: 'pace-1',
-      type: 'pace',
-      text: 'Speaking too quickly',
-      timestamp: 2000,
-      suggestion: 'Try to slow down your speech for better clarity',
-      severity: 'medium'
-    });
+    
+    return feedback;
+  } catch (error) {
+    console.error("Error fetching real-time feedback:", error);
+    return [];
   }
-  
-  if (transcript.length > 100) {
-    feedback.push({
-      id: 'clarity-1',
-      type: 'clarity',
-      text: 'Unclear explanation',
-      timestamp: 5000,
-      suggestion: 'Consider providing more concrete examples',
-      severity: 'low'
-    });
-  }
-  
-  return feedback;
-};
+}
 
-export const getRealtimeFeedback = (transcript: string): FeedbackItem[] => {
-  const feedback: FeedbackItem[] = [];
-  
-  // Simple detection of filler words for real-time feedback
-  const fillerWords = ['um', 'uh', 'like', 'you know', 'actually', 'basically'];
-  const words = transcript.toLowerCase().split(' ');
-  const lastWord = words[words.length - 1];
-  
-  if (fillerWords.includes(lastWord)) {
-    feedback.push({
-      id: `filler-realtime-${Date.now()}`,
-      type: 'filler_word',
-      text: lastWord,
-      timestamp: Date.now(),
-      suggestion: 'Try to reduce filler words',
-      severity: 'low'
-    });
+export function setupSpeechRecognition(): SpeechRecognition | null {
+  if (!('webkitSpeechRecognition' in window)) {
+    console.error('Speech Recognition is not supported in this browser.');
+    return null;
   }
-  
-  return feedback;
-};
 
-// Add the missing analyzeRecording function
-export const analyzeRecording = async (
-  audioBlob: Blob, 
-  transcript: string, 
-  culturalContext: string
-): Promise<{
-  transcript: string;
-  feedback: SpeechAnalysis;
-}> => {
-  // For now, this is a mock implementation
-  console.log(`Analyzing recording with cultural context: ${culturalContext}`);
-  console.log(`Audio size: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Mock response
-  return {
-    transcript: transcript, // In a real implementation, this might be replaced with a more accurate transcript
-    feedback: {
-      fillerWords: [
-        { word: "um", count: 5 },
-        { word: "like", count: 3 },
-        { word: "you know", count: 2 }
-      ],
-      clarity: 75,
-      pace: "good",
-      structure: 80,
-      suggestions: [
-        "Try to eliminate filler words for clearer speech",
-        "Consider providing more concrete examples",
-        "Use more varied vocabulary for greater impact"
-      ],
-      summary: "Overall, your speech was clear and well-structured, but could be improved by reducing filler words."
+  const recognition = new window.webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+  return recognition;
+}
+
+// Improved function to analyze recording with cultural context
+export async function analyzeRecording(
+  audioBlob: Blob,
+  transcript: string,
+  culturalContext: string = "united-states"
+): Promise<{ transcript: string; feedback: SpeechAnalysis }> {
+  try {
+    console.log("AnalyzeRecording called with audioBlob size:", audioBlob.size, "type:", audioBlob.type, "transcript:", transcript, "and cultural context:", culturalContext);
+    
+    if (!audioBlob || audioBlob.size === 0) {
+      throw new Error("Empty audio recording");
     }
-  };
-};
+    
+    // Convert blob to base64 with improved error handling
+    const audioBase64Promise = new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert audio to base64"));
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error("FileReader error"));
+      };
+      
+      reader.readAsDataURL(audioBlob);
+    });
+    
+    const audioBase64 = await audioBase64Promise;
+    console.log("Converted audio to base64, length:", audioBase64.length);
+    
+    if (!audioBase64 || audioBase64.length < 100) {
+      console.warn("Invalid audio data");
+      throw new Error("Invalid audio data");
+    }
+    
+    // Step 1: Call the transcription function to get better transcript
+    let finalTranscript = transcript;
+    try {
+      const transcriptionUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/transcribe-audio";
+      console.log("Calling transcription function at:", transcriptionUrl);
+      
+      const transcriptionResponse = await axios.post(transcriptionUrl, {
+        audioData: audioBase64
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 second timeout for transcription
+      });
+      
+      if (transcriptionResponse.data && transcriptionResponse.data.transcript) {
+        finalTranscript = transcriptionResponse.data.transcript;
+        console.log("Got improved transcript:", finalTranscript.substring(0, 100) + "...");
+      }
+    } catch (transcriptionError) {
+      console.error("Transcription error:", transcriptionError);
+      // Continue with the browser transcript if Whisper fails
+    }
+    
+    // Step 2: Call the feedback function with the best transcript we have and cultural context
+    const feedbackUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/generate-feedback";
+    console.log("Calling feedback function at:", feedbackUrl, "with cultural context:", culturalContext);
+    
+    const feedbackResponse = await axios.post(feedbackUrl, {
+      transcript: finalTranscript,
+      culturalContext: culturalContext
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000 // 30 second timeout for analysis
+    });
+    
+    console.log("Response from feedback function:", feedbackResponse.data);
+    
+    if (!feedbackResponse.data) {
+      throw new Error("No response from analysis function");
+    }
+    
+    // If we got an error in the response
+    if (feedbackResponse.data.error) {
+      throw new Error(feedbackResponse.data.error);
+    }
+    
+    return {
+      transcript: finalTranscript,
+      feedback: feedbackResponse.data.feedback
+    };
+  } catch (error) {
+    console.error("Error analyzing recording:", error);
+    throw error;
+  }
+}

@@ -1,9 +1,14 @@
+
 import ProgressBar from "./recording/ProgressBar";
 import RecordingButtons from "./recording/RecordingButtons";
 import { useRecording } from "@/hooks/use-recording";
 import { useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { FeedbackItem } from "@/services/coachingService";
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
+}
 
 interface RecordingControlProps {
   onRecordingComplete?: (audioBlob: Blob, transcript: string) => void;

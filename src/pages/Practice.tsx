@@ -6,7 +6,11 @@ import Footer from "@/components/layout/Footer";
 import RealtimeFeedback from "@/components/RealtimeFeedback";
 import PracticeContent from "@/components/practice/PracticeContent";
 import { toast } from "@/hooks/use-toast";
-import { FeedbackItem } from "@/services/coachingService";
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
+}
 
 const Practice = () => {
   const location = useLocation();

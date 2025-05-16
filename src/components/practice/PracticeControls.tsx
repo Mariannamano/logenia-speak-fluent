@@ -2,16 +2,15 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecordingControl from "@/components/RecordingControl";
-import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
+import ScenarioSelector from "@/components/ScenarioSelector";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
-import { FeedbackItem } from "@/services/coachingService";
 
 interface PracticeControlsProps {
   onRecordingComplete: (audioBlob: Blob, transcript: string) => void;
   onTranscriptUpdate?: (transcript: string) => void;
-  onFeedbackUpdate?: (feedback: FeedbackItem[]) => void;
+  onFeedbackUpdate?: (feedback: any[]) => void;
   onDurationUpdate?: (durationInSeconds: number) => void;
   currentTranscript: string;
   enableRealtimeCoaching: boolean;
@@ -35,11 +34,11 @@ const PracticeControls = ({
   culturalContext,
   onCultureChange,
 }: PracticeControlsProps) => {
-  const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(initialCategory);
   
-  const handleScenarioChange = (scenario: Scenario) => {
-    setSelectedScenario(scenario);
-    console.log("Selected scenario:", scenario.id);
+  const handleScenarioChange = (scenarioId: string) => {
+    setSelectedScenario(scenarioId);
+    console.log("Selected scenario:", scenarioId);
   };
   
   const handleDurationUpdate = (elapsedTime: number) => {
@@ -63,8 +62,8 @@ const PracticeControls = ({
           
           <div className="flex flex-wrap items-center gap-4 py-2">
             <CulturalContextSelector 
-              selectedCulture={culturalContext} 
-              onCultureChange={onCultureChange}
+              value={culturalContext} 
+              onChange={onCultureChange}
             />
             
             <div className="flex items-center space-x-2">
@@ -89,15 +88,14 @@ const PracticeControls = ({
         
         <TabsContent value="scenario" className="space-y-4">
           <ScenarioSelector 
-            selectedScenario={selectedScenario}
+            initialCategory={initialCategory} 
             onScenarioChange={handleScenarioChange}
-            categories={[]}
           />
           
           <div className="flex flex-wrap items-center gap-4 py-2">
             <CulturalContextSelector 
-              selectedCulture={culturalContext} 
-              onCultureChange={onCultureChange}
+              value={culturalContext} 
+              onChange={onCultureChange}
             />
             
             <div className="flex items-center space-x-2">

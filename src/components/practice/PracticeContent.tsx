@@ -1,9 +1,19 @@
+
 import { useState, useEffect } from "react";
-import PracticeMain from "@/components/practice/PracticeMain";
-import PracticeAnalysis from "@/components/practice/PracticeAnalysis";
-import { SpeechAnalysis, analyzeRecording, FeedbackItem } from "@/services/coachingService";
+import { Card, CardContent } from "@/components/ui/card";
+import PracticeHeader from "@/components/practice/PracticeHeader";
+import PracticeControls from "@/components/practice/PracticeControls";
+import TranscriptDisplay from "@/components/practice/TranscriptDisplay";
+import AnalysisError from "@/components/practice/AnalysisError";
+import FeedbackPanel from "@/components/FeedbackPanel";
+import { SpeechAnalysis, analyzeRecording } from "@/services/coachingService";
 import { toast } from "@/hooks/use-toast";
 import { usePracticeStats } from "@/hooks/use-practice-stats";
+
+interface FeedbackItem {
+  type: "filler" | "followup";
+  content: string;
+}
 
 interface PracticeContentProps {
   initialCategory: string | null;
@@ -119,7 +129,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   
   const handleFeedbackUpdate = (feedback: FeedbackItem[]) => {
     // Count filler word feedback items
-    const newFillerWords = feedback.filter(item => item.type === "filler_word").length;
+    const newFillerWords = feedback.filter(item => item.type === "filler").length;
     if (newFillerWords > 0) {
       setFillerWordCount(prev => prev + newFillerWords);
     }
@@ -144,33 +154,60 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
     setRecordingDuration(durationInSeconds);
   };
   
+  // Add debug log to check transcript visibility
+  useEffect(() => {
+    if (hasRecording) {
+      console.log("Recording completed, transcript should be visible:", completeTranscript);
+      console.log("Has speech analysis:", !!speechAnalysis);
+    }
+  }, [hasRecording, completeTranscript, speechAnalysis]);
+  
   return (
     <div className="container px-4 md:px-6 max-w-4xl mx-auto">
       {/* Main Practice Area */}
-      <PracticeMain
-        fillerWordCount={fillerWordCount}
-        onRecordingComplete={handleRecordingComplete}
-        onTranscriptUpdate={handleTranscriptUpdate}
-        onFeedbackUpdate={handleFeedbackUpdate}
-        onDurationUpdate={handleDurationUpdate}
-        currentTranscript={currentTranscript}
-        enableRealtimeCoaching={enableRealtimeCoaching}
-        setEnableRealtimeCoaching={setEnableRealtimeCoaching}
-        hasRecording={hasRecording}
-        initialCategory={initialCategory}
-        culturalContext={culturalContext}
-        onCultureChange={handleCultureChange}
-      />
+      <Card className="mb-8">
+        <CardContent className="pt-6">
+          <div className="space-y-6">
+            <PracticeHeader fillerWordCount={fillerWordCount} />
+            
+            <PracticeControls 
+              onRecordingComplete={handleRecordingComplete}
+              onTranscriptUpdate={handleTranscriptUpdate}
+              onFeedbackUpdate={handleFeedbackUpdate}
+              onDurationUpdate={handleDurationUpdate}
+              currentTranscript={currentTranscript}
+              enableRealtimeCoaching={enableRealtimeCoaching}
+              setEnableRealtimeCoaching={setEnableRealtimeCoaching}
+              hasRecording={hasRecording}
+              initialCategory={initialCategory}
+              culturalContext={culturalContext}
+              onCultureChange={handleCultureChange}
+            />
+          </div>
+        </CardContent>
+      </Card>
       
-      {/* Analysis Area */}
-      <PracticeAnalysis
-        hasRecording={hasRecording}
-        completeTranscript={completeTranscript}
-        analysisError={analysisError}
-        speechAnalysis={speechAnalysis}
-        isAnalyzing={isAnalyzing}
-        culturalContext={culturalContext}
-      />
+      {/* Error message if analysis failed */}
+      <AnalysisError error={analysisError} />
+      
+      {/* Complete Transcript appears after recording */}
+      {hasRecording && (
+        <TranscriptDisplay 
+          transcript={completeTranscript} 
+          hasRecording={true} 
+        />
+      )}
+      
+      {/* Feedback appears after recording - now passing culturalContext */}
+      {hasRecording && (
+        <div id="feedback-panel-container" className="mb-8">
+          <FeedbackPanel 
+            analysis={speechAnalysis} 
+            isLoading={isAnalyzing} 
+            culturalContext={culturalContext}
+          />
+        </div>
+      )}
     </div>
   );
 };
