@@ -68,7 +68,7 @@ export function setupSpeechRecognition(): SpeechRecognition | null {
   return recognition;
 }
 
-// Improved function to analyze recording with OpenAI Whisper and GPT-4o
+// Improved function to analyze recording with the new separate Edge Functions
 export async function analyzeRecording(
   audioBlob: Blob,
   transcript: string
@@ -78,12 +78,6 @@ export async function analyzeRecording(
     
     if (!audioBlob || audioBlob.size === 0) {
       throw new Error("Empty audio recording");
-    }
-    
-    // Validate transcript
-    if (!transcript || transcript.trim().length < 10) {
-      console.error("Transcript is too short or empty:", transcript);
-      // Continue anyway since we might get a better transcript from Whisper
     }
     
     // Convert blob to base64 with improved error handling
@@ -113,32 +107,58 @@ export async function analyzeRecording(
       throw new Error("Invalid audio data");
     }
     
-    // Call the Supabase Edge Function
-    const functionUrl = import.meta.env.VITE_SUPABASE_FUNCTION_URL || 'http://localhost:54321/functions/v1/generate-ai-summary';
-    console.log("Calling Supabase function at:", functionUrl);
+    // Step 1: Call the transcription function to get better transcript
+    let finalTranscript = transcript;
+    try {
+      const transcriptionUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/transcribe-audio";
+      console.log("Calling transcription function at:", transcriptionUrl);
+      
+      const transcriptionResponse = await axios.post(transcriptionUrl, {
+        audioData: audioBase64
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 second timeout for transcription
+      });
+      
+      if (transcriptionResponse.data && transcriptionResponse.data.transcript) {
+        finalTranscript = transcriptionResponse.data.transcript;
+        console.log("Got improved transcript:", finalTranscript.substring(0, 100) + "...");
+      }
+    } catch (transcriptionError) {
+      console.error("Transcription error:", transcriptionError);
+      // Continue with the browser transcript if Whisper fails
+    }
     
-    const response = await axios.post(functionUrl, {
-      audioData: audioBase64,
-      transcript
+    // Step 2: Call the feedback function with the best transcript we have
+    const feedbackUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/generate-feedback";
+    console.log("Calling feedback function at:", feedbackUrl);
+    
+    const feedbackResponse = await axios.post(feedbackUrl, {
+      transcript: finalTranscript
     }, {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 60000 // 60 second timeout for long processing
+      timeout: 30000 // 30 second timeout for analysis
     });
     
-    console.log("Response from Supabase function:", response.data);
+    console.log("Response from feedback function:", feedbackResponse.data);
     
-    if (!response.data) {
+    if (!feedbackResponse.data) {
       throw new Error("No response from analysis function");
     }
     
     // If we got an error in the response
-    if (response.data.error) {
-      throw new Error(response.data.error);
+    if (feedbackResponse.data.error) {
+      throw new Error(feedbackResponse.data.error);
     }
     
-    return response.data;
+    return {
+      transcript: finalTranscript,
+      feedback: feedbackResponse.data.feedback
+    };
   } catch (error) {
     console.error("Error analyzing recording:", error);
     throw error;
