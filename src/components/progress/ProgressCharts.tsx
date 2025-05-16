@@ -2,24 +2,66 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePracticeStats } from "@/hooks/use-practice-stats";
+import { useState, useEffect } from "react";
 
-// Mock data for progress charts
-const weeklyData = [
-  { name: 'Mon', clarity: 65, pacing: 70, fillerWords: 12 },
-  { name: 'Tue', clarity: 68, pacing: 72, fillerWords: 10 },
-  { name: 'Wed', clarity: 72, pacing: 75, fillerWords: 8 },
-  { name: 'Thu', clarity: 75, pacing: 76, fillerWords: 7 },
-  { name: 'Fri', clarity: 78, pacing: 80, fillerWords: 5 },
-];
-
-const monthlyData = [
-  { name: 'Week 1', clarity: 60, pacing: 65, fillerWords: 15 },
-  { name: 'Week 2', clarity: 68, pacing: 70, fillerWords: 10 },
-  { name: 'Week 3', clarity: 75, pacing: 78, fillerWords: 7 },
-  { name: 'Week 4', clarity: 82, pacing: 85, fillerWords: 4 },
-];
+// Types for chart data
+interface ChartDataPoint {
+  name: string;
+  clarity: number;
+  pacing: number;
+  fillerWords: number;
+}
 
 const ProgressCharts = () => {
+  const { stats } = usePracticeStats();
+  const [weeklyData, setWeeklyData] = useState<ChartDataPoint[]>([]);
+  const [monthlyData, setMonthlyData] = useState<ChartDataPoint[]>([]);
+
+  useEffect(() => {
+    // Generate data based on practice stats
+    // For a real app, this would come from an API or calculated from session history
+    generateChartData();
+  }, [stats.totalSessions]);
+
+  const generateChartData = () => {
+    // Generate weekly data based on stats
+    // This is a simplified version that creates data points that show improvement
+    // based on the user's total sessions and practice time
+    
+    // Base values that grow with number of sessions
+    const baseClarity = 50 + Math.min(stats.totalSessions * 2, 30);
+    const basePacing = 55 + Math.min(stats.totalSessions * 1.5, 25);
+    const baseFillerWords = Math.max(20 - stats.totalSessions, 5);
+    
+    // Weekly progress (showing gradual improvement through the week)
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const newWeeklyData = days.map((day, index) => {
+      const improvement = index * (stats.level / 10);
+      return {
+        name: day,
+        clarity: Math.min(baseClarity + improvement, 100),
+        pacing: Math.min(basePacing + improvement, 100),
+        fillerWords: Math.max(baseFillerWords - improvement * 0.5, 0)
+      };
+    });
+    
+    // Monthly progress (showing improvement over weeks)
+    const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    const newMonthlyData = weeks.map((week, index) => {
+      const improvement = index * (stats.level / 5);
+      return {
+        name: week,
+        clarity: Math.min(baseClarity + improvement * 2, 100),
+        pacing: Math.min(basePacing + improvement * 2, 100),
+        fillerWords: Math.max(baseFillerWords - improvement, 0)
+      };
+    });
+    
+    setWeeklyData(newWeeklyData);
+    setMonthlyData(newMonthlyData);
+  };
+
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
