@@ -10,7 +10,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import OpenAI from "https://esm.sh/openai@4.17.0";
 
 // Get the API key from environment variables
-const apiKey = Deno.env.get("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");
+const apiKey = Deno.env.get("OPENAI_API_KEY");
 
 if (!apiKey) {
   console.error("OPENAI_API_KEY is not set in environment variables");
@@ -38,7 +38,7 @@ serve(async (req) => {
 
     console.log("Received request with audioData length:", 
       audioData ? (typeof audioData === 'string' ? audioData.length : 'not a string') : 'no audio data');
-    console.log("Received transcript:", transcript ? transcript.substring(0, 100)  "..." : 'no transcript');
+    console.log("Received transcript:", transcript ? transcript.substring(0, 100) + "..." : 'no transcript');
 
     // Variable to hold the final transcript
     let finalTranscript = transcript || "";
@@ -124,7 +124,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100)  "...");
+    console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100) + "...");
 
     // STEP 2: Generate AI feedback on the transcript using GPT-4o
     try {
@@ -151,7 +151,7 @@ serve(async (req) => {
         ]
       });
 
-      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100)  "...");
+      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100) + "...");
       const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
 
       // Return the transcript and feedback
@@ -167,7 +167,7 @@ serve(async (req) => {
       );
     } catch (gptError) {
       console.error("Error with GPT analysis:", gptError);
-      throw new Error("Failed to analyze speech with GPT: "  gptError.message);
+      throw new Error("Failed to analyze speech with GPT: " + gptError.message);
     }
   } catch (error) {
     console.error("Error processing request:", error);
