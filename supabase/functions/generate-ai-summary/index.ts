@@ -73,7 +73,9 @@ serve(async (req) => {
         }
 
         // Create file object for OpenAI
-        const file = new File([audioBytes], "audio.webm", { type: "audio/webm" });
+        const blob = new Blob([audioBytes], { type: "audio/webm" });
+// @ts-ignore
+const file = new File([blob], "audio.webm", { type: "audio/webm" });
 
         console.log("Created file object with size:", file.size);
 
