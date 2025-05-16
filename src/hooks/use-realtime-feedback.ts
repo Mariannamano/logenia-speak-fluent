@@ -1,11 +1,6 @@
 
 import { useRef, useEffect } from "react";
-import { getRealtimeFeedback } from "@/services/coachingService";
-
-interface FeedbackItem {
-  type: "filler" | "followup";
-  content: string;
-}
+import { getRealtimeFeedback, FeedbackItem } from "@/services/coachingService";
 
 interface UseRealtimeFeedbackProps {
   isActive: boolean;

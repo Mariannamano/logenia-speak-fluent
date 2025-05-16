@@ -6,11 +6,13 @@ import ScenarioSelector from "@/components/ScenarioSelector";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
+import { Scenario } from "@/data/practiceScenarios";
+import { FeedbackItem } from "@/services/coachingService";
 
 interface PracticeControlsProps {
   onRecordingComplete: (audioBlob: Blob, transcript: string) => void;
   onTranscriptUpdate?: (transcript: string) => void;
-  onFeedbackUpdate?: (feedback: any[]) => void;
+  onFeedbackUpdate?: (feedback: FeedbackItem[]) => void;
   onDurationUpdate?: (durationInSeconds: number) => void;
   currentTranscript: string;
   enableRealtimeCoaching: boolean;
@@ -36,9 +38,9 @@ const PracticeControls = ({
 }: PracticeControlsProps) => {
   const [selectedScenario, setSelectedScenario] = useState<string | null>(initialCategory);
   
-  const handleScenarioChange = (scenarioId: string) => {
-    setSelectedScenario(scenarioId);
-    console.log("Selected scenario:", scenarioId);
+  const handleScenarioChange = (scenario: Scenario) => {
+    setSelectedScenario(scenario.id);
+    console.log("Selected scenario:", scenario.id);
   };
   
   const handleDurationUpdate = (elapsedTime: number) => {
@@ -62,8 +64,8 @@ const PracticeControls = ({
           
           <div className="flex flex-wrap items-center gap-4 py-2">
             <CulturalContextSelector 
-              value={culturalContext} 
-              onChange={onCultureChange}
+              selectedCulture={culturalContext} 
+              onCultureChange={onCultureChange}
             />
             
             <div className="flex items-center space-x-2">
@@ -94,8 +96,8 @@ const PracticeControls = ({
           
           <div className="flex flex-wrap items-center gap-4 py-2">
             <CulturalContextSelector 
-              value={culturalContext} 
-              onChange={onCultureChange}
+              selectedCulture={culturalContext} 
+              onCultureChange={onCultureChange}
             />
             
             <div className="flex items-center space-x-2">
