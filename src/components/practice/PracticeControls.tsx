@@ -7,6 +7,7 @@ import RecordingControl from "@/components/RecordingControl";
 import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
 import { practiceCategories } from "@/data/practiceScenarios";
 import { useToast } from "@/hooks/use-toast";
+import CulturalContextSelector from "./CulturalContextSelector";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -22,6 +23,8 @@ interface PracticeControlsProps {
   setEnableRealtimeCoaching: (enabled: boolean) => void;
   hasRecording?: boolean;
   initialCategory?: string | null;
+  culturalContext: string;
+  onCultureChange: (culture: string) => void;
 }
 
 const PracticeControls = ({
@@ -33,6 +36,8 @@ const PracticeControls = ({
   setEnableRealtimeCoaching,
   hasRecording = false,
   initialCategory = null,
+  culturalContext,
+  onCultureChange,
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
@@ -54,6 +59,14 @@ const PracticeControls = ({
     });
   };
 
+  const handleCultureChange = (cultureId: string) => {
+    onCultureChange(cultureId);
+    toast({
+      title: "Cultural Context Updated",
+      description: `Feedback will now be tailored for ${cultureId.replace("-", " ")} communication norms.`,
+    });
+  };
+
   const handleRecordingComplete = (audioBlob: Blob, transcript: string) => {
     console.log("PracticeControls - Recording completed, forwarding to parent. Blob size:", audioBlob.size);
     onRecordingComplete(audioBlob, transcript);
@@ -67,6 +80,12 @@ const PracticeControls = ({
         selectedScenario={selectedScenario}
         onScenarioChange={handleScenarioChange}
         initialCategory={initialCategory}
+      />
+      
+      {/* Cultural Context Selector */}
+      <CulturalContextSelector
+        selectedCulture={culturalContext}
+        onCultureChange={handleCultureChange}
       />
       
       <div className="flex items-center justify-between">

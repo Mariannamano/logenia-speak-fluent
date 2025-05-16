@@ -68,13 +68,14 @@ export function setupSpeechRecognition(): SpeechRecognition | null {
   return recognition;
 }
 
-// Improved function to analyze recording with the new separate Edge Functions
+// Improved function to analyze recording with cultural context
 export async function analyzeRecording(
   audioBlob: Blob,
-  transcript: string
+  transcript: string,
+  culturalContext: string = "united-states"
 ): Promise<{ transcript: string; feedback: SpeechAnalysis }> {
   try {
-    console.log("AnalyzeRecording called with audioBlob size:", audioBlob.size, "type:", audioBlob.type, "and transcript:", transcript);
+    console.log("AnalyzeRecording called with audioBlob size:", audioBlob.size, "type:", audioBlob.type, "transcript:", transcript, "and cultural context:", culturalContext);
     
     if (!audioBlob || audioBlob.size === 0) {
       throw new Error("Empty audio recording");
@@ -131,12 +132,13 @@ export async function analyzeRecording(
       // Continue with the browser transcript if Whisper fails
     }
     
-    // Step 2: Call the feedback function with the best transcript we have
+    // Step 2: Call the feedback function with the best transcript we have and cultural context
     const feedbackUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/generate-feedback";
-    console.log("Calling feedback function at:", feedbackUrl);
+    console.log("Calling feedback function at:", feedbackUrl, "with cultural context:", culturalContext);
     
     const feedbackResponse = await axios.post(feedbackUrl, {
-      transcript: finalTranscript
+      transcript: finalTranscript,
+      culturalContext: culturalContext
     }, {
       headers: {
         'Content-Type': 'application/json'

@@ -28,6 +28,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [culturalContext, setCulturalContext] = useState("united-states"); // Default to US
   
   const handleTranscriptUpdate = (transcript: string) => {
     setCurrentTranscript(transcript);
@@ -58,8 +59,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
         description: "We're processing your recording to provide feedback..."
       });
       
-      // Send recording for AI analysis
-      const result = await analyzeRecording(audioBlob, transcript);
+      // Send recording for AI analysis with cultural context
+      const result = await analyzeRecording(audioBlob, transcript, culturalContext);
       
       // Update transcript with potentially more accurate one from whisper
       if (result.transcript && result.transcript.length > 10) {
@@ -130,6 +131,11 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
     onFeedbackUpdate(feedback);
   };
   
+  const handleCultureChange = (cultureId: string) => {
+    setCulturalContext(cultureId);
+    console.log("Cultural context updated to:", cultureId);
+  };
+  
   // Add debug log to check transcript visibility
   useEffect(() => {
     if (hasRecording) {
@@ -155,6 +161,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
               setEnableRealtimeCoaching={setEnableRealtimeCoaching}
               hasRecording={hasRecording}
               initialCategory={initialCategory}
+              culturalContext={culturalContext}
+              onCultureChange={handleCultureChange}
             />
           </div>
         </CardContent>
