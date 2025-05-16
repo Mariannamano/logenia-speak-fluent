@@ -89,7 +89,7 @@ const PracticeControls = ({
         
         <TabsContent value="scenario" className="space-y-4">
           <ScenarioSelector 
-            selectedScenario={selectedScenario}
+            selectedScenario={selectedScenario || ""}
             onScenarioChange={handleScenarioChange}
             categories={[]}
           />

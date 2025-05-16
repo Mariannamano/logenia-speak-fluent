@@ -1,14 +1,16 @@
 
-import axios from "axios";
+// This file already exists but we need to update the SpeechAnalysis type to fix type errors
 
-// Define feedback item type used in multiple components
 export interface FeedbackItem {
-  type: "filler" | "followup";
-  content: string;
+  type: "filler" | "grammar" | "vocabulary" | "clarity" | "pace" | "structure";
+  message: string;
+  timestamp?: number;
+  wordIndex?: number;
+  confidence?: number;
 }
 
 export interface SpeechAnalysis {
-  fillerWords: { word: string; count: number }[];
+  fillerWords: { word: string; count: number; }[];
   clarity: number;
   pace: "too_slow" | "slow" | "good" | "fast" | "too_fast";
   structure: number;

@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { PracticeStats } from "@/types/practice";
 import { calculateLevel } from "@/utils/level-utils";
 import { updateAchievements } from "@/utils/achievement-utils";
 import { 
@@ -10,9 +9,10 @@ import {
   getLastPracticeDate
 } from "@/utils/practice-storage";
 import { calculateStreakStatus } from "@/utils/streak-utils";
+import type { PracticeStats, Achievement } from "@/types/practice";
 
-export { PracticeStats } from "@/types/practice";
-export { Achievement } from "@/types/practice";
+export type { PracticeStats } from "@/types/practice";
+export type { Achievement } from "@/types/practice";
 
 export function usePracticeStats() {
   const [stats, setStats] = useState<PracticeStats>(loadPracticeStats());
