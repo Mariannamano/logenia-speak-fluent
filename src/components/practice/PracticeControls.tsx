@@ -2,21 +2,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecordingControl from "@/components/RecordingControl";
-import ScenarioSelector from "@/components/ScenarioSelector";
+import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
 import { FeedbackItem } from "@/services/coachingService";
-
-// Define a local Scenario interface since it's not exported from practiceScenarios
-interface Scenario {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  prompts: string[];
-}
 
 interface PracticeControlsProps {
   onRecordingComplete: (audioBlob: Blob, transcript: string) => void;
@@ -45,10 +35,10 @@ const PracticeControls = ({
   culturalContext,
   onCultureChange,
 }: PracticeControlsProps) => {
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(initialCategory);
+  const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   
   const handleScenarioChange = (scenario: Scenario) => {
-    setSelectedScenario(scenario.id);
+    setSelectedScenario(scenario);
     console.log("Selected scenario:", scenario.id);
   };
   
@@ -99,7 +89,7 @@ const PracticeControls = ({
         
         <TabsContent value="scenario" className="space-y-4">
           <ScenarioSelector 
-            selectedScenario={selectedScenario || ""}
+            selectedScenario={selectedScenario}
             onScenarioChange={handleScenarioChange}
             categories={[]}
           />

@@ -1,11 +1,4 @@
-import { Scenario } from "@/components/ScenarioSelector";
-
-export interface ScenarioCategory {
-  id: string;
-  name: string;
-  description: string;
-  scenarios: Scenario[];
-}
+import { Scenario, ScenarioCategory } from "@/components/ScenarioSelector";
 
 export const practiceCategories: ScenarioCategory[] = [
   {
