@@ -6,7 +6,6 @@ import ScenarioSelector from "@/components/ScenarioSelector";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
-import { Scenario } from "@/data/practiceScenarios";
 import { FeedbackItem } from "@/services/coachingService";
 
 interface PracticeControlsProps {
@@ -38,7 +37,7 @@ const PracticeControls = ({
 }: PracticeControlsProps) => {
   const [selectedScenario, setSelectedScenario] = useState<string | null>(initialCategory);
   
-  const handleScenarioChange = (scenario: Scenario) => {
+  const handleScenarioChange = (scenario: any) => {
     setSelectedScenario(scenario.id);
     console.log("Selected scenario:", scenario.id);
   };
@@ -90,8 +89,9 @@ const PracticeControls = ({
         
         <TabsContent value="scenario" className="space-y-4">
           <ScenarioSelector 
-            initialCategory={initialCategory} 
+            selectedScenario={selectedScenario}
             onScenarioChange={handleScenarioChange}
+            categories={[]}
           />
           
           <div className="flex flex-wrap items-center gap-4 py-2">
