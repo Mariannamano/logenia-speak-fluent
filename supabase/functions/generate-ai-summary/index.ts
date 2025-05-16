@@ -12,6 +12,9 @@ import OpenAI from "https://esm.sh/openai@4.17.0";
 // Get the API key from environment variables
 const apiKey = Deno.env.get("OPENAI_API_KEY");
 
+console.log("Edge function starting. API key exists:", !!apiKey);
+console.log("API key first 4 chars:", apiKey ? apiKey.substring(0, 4) : "NULL");
+
 if (!apiKey) {
   console.error("OPENAI_API_KEY is not set in environment variables");
 }
@@ -78,21 +81,28 @@ serve(async (req) => {
           throw new Error("Empty audio file created");
         }
 
-        // Use OpenAI's Whisper model for accurate transcription
-        const transcription = await openai.audio.transcriptions.create({
-          file,
-          model: "whisper-1",
-          language: "en",
-          response_format: "text",
-        });
-
-        console.log("Got transcription from Whisper:", transcription);
-        whisperTranscript = transcription.text || transcription;
+        console.log("Before OpenAI API call. API key exists:", !!apiKey);
         
-        // Always prefer Whisper transcript if available
-        if (whisperTranscript && whisperTranscript.length > 0) {
-          console.log("Using Whisper transcript as it's available");
-          finalTranscript = whisperTranscript;
+        try {
+          // Use OpenAI's Whisper model for accurate transcription
+          const transcription = await openai.audio.transcriptions.create({
+            file,
+            model: "whisper-1",
+            language: "en",
+            response_format: "text",
+          });
+
+          console.log("Got transcription from Whisper:", transcription);
+          whisperTranscript = transcription.text || transcription;
+          
+          // Always prefer Whisper transcript if available
+          if (whisperTranscript && whisperTranscript.length > 0) {
+            console.log("Using Whisper transcript as it's available");
+            finalTranscript = whisperTranscript;
+          }
+        } catch (openaiError) {
+          console.error("OpenAI API Error:", openaiError);
+          console.error("Error details:", JSON.stringify(openaiError));
         }
       }
     } catch (whisperError) {

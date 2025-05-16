@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface UseRecordingTimerProps {
   isActive: boolean;
@@ -14,35 +14,68 @@ export function useRecordingTimer({
 }: UseRecordingTimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [progress, setProgress] = useState(0);
-
-  // Track recording time
+  const requestIdRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  
+  // Use requestAnimationFrame for smoother timer updates
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isActive) {
-      interval = setInterval(() => {
-        setElapsedTime(prev => {
-          const newTime = prev + 1;
-          setProgress((newTime / maxDuration) * 100);
-          
-          if (newTime >= maxDuration && onTimerComplete) {
-            onTimerComplete();
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    } else {
+    if (!isActive) {
+      // Reset timer when not active
+      if (requestIdRef.current) {
+        cancelAnimationFrame(requestIdRef.current);
+        requestIdRef.current = null;
+      }
       setElapsedTime(0);
       setProgress(0);
+      startTimeRef.current = null;
+      return;
     }
     
-    return () => clearInterval(interval);
+    // Initialize start time
+    if (!startTimeRef.current) {
+      startTimeRef.current = performance.now();
+    }
+    
+    // Animation frame callback
+    const updateTimer = (timestamp: number) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = timestamp;
+      }
+      
+      const elapsedMs = timestamp - startTimeRef.current;
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      
+      setElapsedTime(elapsedSeconds);
+      setProgress((elapsedSeconds / maxDuration) * 100);
+      
+      if (elapsedSeconds >= maxDuration && onTimerComplete) {
+        onTimerComplete();
+        return; // Stop the loop
+      }
+      
+      // Continue the animation loop
+      requestIdRef.current = requestAnimationFrame(updateTimer);
+    };
+    
+    // Start the animation loop
+    requestIdRef.current = requestAnimationFrame(updateTimer);
+    
+    // Clean up on unmount or when isActive changes
+    return () => {
+      if (requestIdRef.current) {
+        cancelAnimationFrame(requestIdRef.current);
+      }
+    };
   }, [isActive, maxDuration, onTimerComplete]);
 
   const resetTimer = () => {
+    if (requestIdRef.current) {
+      cancelAnimationFrame(requestIdRef.current);
+      requestIdRef.current = null;
+    }
     setElapsedTime(0);
     setProgress(0);
+    startTimeRef.current = null;
   };
 
   return {
