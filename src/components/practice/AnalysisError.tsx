@@ -6,7 +6,6 @@ interface AnalysisErrorProps {
 }
 
 const AnalysisError = ({ error }: AnalysisErrorProps) => {
-  console.log("[AnalysisError] got error prop:", error);
   if (!error) return null;
   
   return (

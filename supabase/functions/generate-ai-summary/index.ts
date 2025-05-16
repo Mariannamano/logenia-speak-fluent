@@ -38,7 +38,7 @@ serve(async (req) => {
 
     console.log("Received request with audioData length:", 
       audioData ? (typeof audioData === 'string' ? audioData.length : 'not a string') : 'no audio data');
-    console.log("Received transcript:", transcript ? transcript.substring(0, 100)  "..." : 'no transcript');
+    console.log("Received transcript:", transcript ? transcript.substring(0, 100) + "..." : 'no transcript');
 
     // Variable to hold the final transcript
     let finalTranscript = transcript || "";
@@ -124,7 +124,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100)  "...");
+    console.log("Sending final transcript for analysis:", finalTranscript.substring(0, 100) + "...");
 
     // STEP 2: Generate AI feedback on the transcript using GPT-4o
     try {
@@ -132,26 +132,41 @@ serve(async (req) => {
       const feedbackResponse = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: `You are a professional speech coach. Output ONLY valid JSON matching:
-
-{
-  "fillerWords": [
-    { "word": "<string>", "count": <integer> }
-  ],
-  "clarity": <integer 0–100>,
-  "pace": "<too slow|good|too fast>",
-  "structure": <integer 0–100>,
-  "suggestions": [
-    "<string>",
-    "<string>"
-  ],
-  "summary": "<string ending with encouragement>"
-}` },
-          { role: "user", content: finalTranscript }
-        ]
+          {
+            role: "system",
+            content: `You are a professional speech coach focused on helping users improve their spoken English in professional settings.
+            
+            Analyze the transcript strictly based on its content. Do not infer or invent details beyond what the user said.
+            Do not guess how the user spoke, do not assume emotional tone or intent, and do not fabricate examples 
+            unless they appear in the transcription.
+            
+            Your analysis should include:
+            
+            1. Filler Word Count - Count only the actual filler words (e.g., "um," "uh," "like," "you know") 
+               that appear in the transcript. List each word and how many times it was used.
+            2. Pacing & Fluency - Identify any signs of rushed or hesitant phrasing visible in the transcription.
+               Only comment if this is evident in the actual words.
+            3. Clarity & Structure - Evaluate whether the ideas are logically structured and easy to follow.
+            4. Improvement Suggestions - Give 1-2 specific, practical tips based ONLY on the actual transcript.
+               If the text is already clear and fluent, say so.
+            
+            Format your response as JSON with these fields:
+            - fillerWords: Array of objects with {word: string, count: number}
+            - clarity: number from 0-100
+            - pace: "too slow", "good", or "too fast"
+            - structure: number from 0-100 
+            - suggestions: Array of suggestion strings
+            - summary: Brief text summary of the analysis, ending with an encouraging statement.`
+          },
+          {
+            role: "user",
+            content: finalTranscript
+          }
+        ],
+        response_format: { type: "json_object" }
       });
 
-      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100)  "...");
+      console.log("GPT Response received:", feedbackResponse.choices[0].message.content.substring(0, 100) + "...");
       const feedback = JSON.parse(feedbackResponse.choices[0].message.content);
 
       // Return the transcript and feedback
@@ -167,7 +182,7 @@ serve(async (req) => {
       );
     } catch (gptError) {
       console.error("Error with GPT analysis:", gptError);
-      throw new Error("Failed to analyze speech with GPT: "  gptError.message);
+      throw new Error("Failed to analyze speech with GPT: " + gptError.message);
     }
   } catch (error) {
     console.error("Error processing request:", error);
