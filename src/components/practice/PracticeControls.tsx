@@ -5,9 +5,10 @@ import { Switch } from "@/components/ui/switch";
 import { Mic } from "lucide-react";
 import RecordingControl from "@/components/RecordingControl";
 import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
-import { practiceCategories } from "@/data/practiceScenarios";
+import { fintechCategories } from "@/data/fintechScenarios";
 import { useToast } from "@/hooks/use-toast";
 import CulturalContextSelector from "./CulturalContextSelector";
+import RegulatoryContextSelector from "./RegulatoryContextSelector";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -25,6 +26,8 @@ interface PracticeControlsProps {
   initialCategory?: string | null;
   culturalContext: string;
   onCultureChange: (culture: string) => void;
+  regulatoryContext: string;
+  onRegulatoryChange: (context: string) => void;
 }
 
 const PracticeControls = ({
@@ -38,13 +41,14 @@ const PracticeControls = ({
   initialCategory = null,
   culturalContext,
   onCultureChange,
+  regulatoryContext,
+  onRegulatoryChange,
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    // If initialCategory is provided, set it as the active category
     if (initialCategory) {
       setActiveCategory(initialCategory);
       console.log("Setting initial category in PracticeControls:", initialCategory);
@@ -67,6 +71,14 @@ const PracticeControls = ({
     });
   };
 
+  const handleRegulatoryChange = (contextId: string) => {
+    onRegulatoryChange(contextId);
+    toast({
+      title: "Regulatory Context Updated", 
+      description: `Scenarios will now reflect ${contextId.toUpperCase()} regulatory framework.`,
+    });
+  };
+
   const handleRecordingComplete = (audioBlob: Blob, transcript: string) => {
     console.log("PracticeControls - Recording completed, forwarding to parent. Blob size:", audioBlob.size);
     onRecordingComplete(audioBlob, transcript);
@@ -76,17 +88,24 @@ const PracticeControls = ({
     <div className="space-y-4">
       {/* Scenario Selector */}
       <ScenarioSelector 
-        categories={practiceCategories}
+        categories={fintechCategories}
         selectedScenario={selectedScenario}
         onScenarioChange={handleScenarioChange}
         initialCategory={initialCategory}
       />
       
-      {/* Cultural Context Selector */}
-      <CulturalContextSelector
-        selectedCulture={culturalContext}
-        onCultureChange={handleCultureChange}
-      />
+      {/* Context Selectors */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CulturalContextSelector
+          selectedCulture={culturalContext}
+          onCultureChange={handleCultureChange}
+        />
+        
+        <RegulatoryContextSelector
+          selectedContext={regulatoryContext}
+          onContextChange={handleRegulatoryChange}
+        />
+      </div>
       
       <div className="flex items-center justify-between">
         <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer text-lg">
@@ -114,7 +133,7 @@ const PracticeControls = ({
       </div>
       
       {currentTranscript && !hasRecording && (
-        <div className="mt-4 p-4 bg-fluent-100 dark:bg-fluent-800/40 rounded-md border border-fluent-200 dark:border-fluent-700/50">
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-700/50">
           <Label className="text-sm text-muted-foreground">Live Transcript</Label>
           <p className="text-base mt-1">{currentTranscript}</p>
         </div>

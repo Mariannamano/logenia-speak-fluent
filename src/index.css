@@ -5,83 +5,83 @@
 
 @layer base {
   :root {
-    --background: 270 100% 98%;
-    --foreground: 270 50% 15%;
+    --background: 240 100% 98%;
+    --foreground: 210 50% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 270 50% 15%;
+    --card-foreground: 210 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 50% 15%;
+    --popover-foreground: 210 50% 15%;
 
-    --primary: 270 84% 65%;
-    --primary-foreground: 270 5% 98%;
+    --primary: 210 84% 55%;
+    --primary-foreground: 210 5% 98%;
 
-    --secondary: 270 25% 92%;
-    --secondary-foreground: 270 50% 15%;
+    --secondary: 210 25% 92%;
+    --secondary-foreground: 210 50% 15%;
 
-    --muted: 270 25% 92%;
-    --muted-foreground: 270 30% 40%;
+    --muted: 210 25% 92%;
+    --muted-foreground: 210 30% 40%;
 
-    --accent: 250 100% 75%;
-    --accent-foreground: 250 5% 98%;
+    --accent: 200 100% 65%;
+    --accent-foreground: 200 5% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 270 15% 85%;
-    --input: 270 15% 85%;
-    --ring: 270 80% 45%;
+    --border: 210 15% 85%;
+    --input: 210 15% 85%;
+    --ring: 210 80% 45%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 270 30% 98%;
-    --sidebar-foreground: 270 50% 15%;
-    --sidebar-primary: 270 84% 65%;
-    --sidebar-primary-foreground: 270 5% 98%;
-    --sidebar-accent: 270 20% 95%;
-    --sidebar-accent-foreground: 270 50% 15%;
-    --sidebar-border: 270 15% 90%;
-    --sidebar-ring: 270 80% 45%;
+    --sidebar-background: 210 30% 98%;
+    --sidebar-foreground: 210 50% 15%;
+    --sidebar-primary: 210 84% 55%;
+    --sidebar-primary-foreground: 210 5% 98%;
+    --sidebar-accent: 210 20% 95%;
+    --sidebar-accent-foreground: 210 50% 15%;
+    --sidebar-border: 210 15% 90%;
+    --sidebar-ring: 210 80% 45%;
   }
 
   .dark {
-    --background: 270 30% 10%;
-    --foreground: 270 15% 90%;
+    --background: 210 30% 10%;
+    --foreground: 210 15% 90%;
 
-    --card: 270 25% 12%;
-    --card-foreground: 270 15% 90%;
+    --card: 210 25% 12%;
+    --card-foreground: 210 15% 90%;
 
-    --popover: 270 25% 12%;
-    --popover-foreground: 270 15% 90%;
+    --popover: 210 25% 12%;
+    --popover-foreground: 210 15% 90%;
 
-    --primary: 270 70% 65%;
-    --primary-foreground: 270 5% 98%;
+    --primary: 210 70% 55%;
+    --primary-foreground: 210 5% 98%;
 
-    --secondary: 270 30% 20%;
-    --secondary-foreground: 270 15% 90%;
+    --secondary: 210 30% 20%;
+    --secondary-foreground: 210 15% 90%;
 
-    --muted: 270 30% 20%;
-    --muted-foreground: 270 15% 65%;
+    --muted: 210 30% 20%;
+    --muted-foreground: 210 15% 65%;
 
-    --accent: 250 70% 70%;
-    --accent-foreground: 250 5% 98%;
+    --accent: 200 70% 60%;
+    --accent-foreground: 200 5% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 270 25% 25%;
-    --input: 270 25% 25%;
-    --ring: 270 70% 65%;
+    --border: 210 25% 25%;
+    --input: 210 25% 25%;
+    --ring: 210 70% 55%;
 
-    --sidebar-background: 270 35% 12%;
-    --sidebar-foreground: 270 15% 90%;
-    --sidebar-primary: 270 70% 65%;
-    --sidebar-primary-foreground: 270 5% 98%;
-    --sidebar-accent: 270 30% 18%;
-    --sidebar-accent-foreground: 270 15% 90%;
-    --sidebar-border: 270 25% 22%;
-    --sidebar-ring: 270 70% 65%;
+    --sidebar-background: 210 35% 12%;
+    --sidebar-foreground: 210 15% 90%;
+    --sidebar-primary: 210 70% 55%;
+    --sidebar-primary-foreground: 210 5% 98%;
+    --sidebar-accent: 210 30% 18%;
+    --sidebar-accent-foreground: 210 15% 90%;
+    --sidebar-border: 210 25% 22%;
+    --sidebar-ring: 210 70% 55%;
   }
 }
 
@@ -96,7 +96,13 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Tomorrow', sans-serif;
+    font-weight: 500;
+  }
+
+  .brand-title {
+    font-family: 'Tomorrow', sans-serif;
+    font-weight: 500;
   }
 }
 
@@ -112,10 +118,10 @@
   @apply transition-all duration-300 hover:translate-y-[-5px] hover:shadow-lg;
 }
 
-.fluent-gradient {
-  @apply bg-gradient-to-br from-fluent-primary to-fluent-accent1;
+.fintech-gradient {
+  @apply bg-gradient-to-br from-blue-600 to-blue-400;
 }
 
-.fluent-card {
-  @apply bg-white dark:bg-fluent-900/50 rounded-xl border border-fluent-100/60 dark:border-fluent-700/20 cozy-shadow;
+.fintech-card {
+  @apply bg-white dark:bg-blue-900/50 rounded-xl border border-blue-100/60 dark:border-blue-700/20 cozy-shadow;
 }

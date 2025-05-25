@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      meals: {
+        Row: {
+          created_at: string | null
+          cuisine_type: string
+          cycle_phase_tags: string[] | null
+          description: string
+          dietary_tags: string[] | null
+          estimated_cost: number | null
+          id: string
+          image_url: string | null
+          ingredients: Json
+          nutrition_blurb: string
+          symptom_tags: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          cuisine_type: string
+          cycle_phase_tags?: string[] | null
+          description: string
+          dietary_tags?: string[] | null
+          estimated_cost?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients: Json
+          nutrition_blurb: string
+          symptom_tags?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          cuisine_type?: string
+          cycle_phase_tags?: string[] | null
+          description?: string
+          dietary_tags?: string[] | null
+          estimated_cost?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          nutrition_blurb?: string
+          symptom_tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -36,12 +81,204 @@ export type Database = {
         }
         Relationships: []
       }
+      shopping_list_items: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          estimated_cost: number | null
+          id: string
+          ingredient_name: string
+          is_checked: boolean | null
+          meal_id: string | null
+          quantity: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          estimated_cost?: number | null
+          id?: string
+          ingredient_name: string
+          is_checked?: boolean | null
+          meal_id?: string | null
+          quantity?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          estimated_cost?: number | null
+          id?: string
+          ingredient_name?: string
+          is_checked?: boolean | null
+          meal_id?: string | null
+          quantity?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_meal_plans: {
+        Row: {
+          breakfast_id: string | null
+          created_at: string | null
+          date: string
+          dinner_id: string | null
+          id: string
+          lunch_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          breakfast_id?: string | null
+          created_at?: string | null
+          date: string
+          dinner_id?: string | null
+          id?: string
+          lunch_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          breakfast_id?: string | null
+          created_at?: string | null
+          date?: string
+          dinner_id?: string | null
+          id?: string
+          lunch_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_meal_plans_breakfast_id_fkey"
+            columns: ["breakfast_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_meal_plans_dinner_id_fkey"
+            columns: ["dinner_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_meal_plans_lunch_id_fkey"
+            columns: ["lunch_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_meal_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          budget: string | null
+          complexity: string | null
+          created_at: string | null
+          cuisine_preference: string | null
+          cycle_phase: string | null
+          dietary_preferences: string[] | null
+          id: string
+          mood: string | null
+          portion_size: string | null
+          region: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          budget?: string | null
+          complexity?: string | null
+          created_at?: string | null
+          cuisine_preference?: string | null
+          cycle_phase?: string | null
+          dietary_preferences?: string[] | null
+          id?: string
+          mood?: string | null
+          portion_size?: string | null
+          region?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          budget?: string | null
+          complexity?: string | null
+          created_at?: string | null
+          cuisine_preference?: string | null
+          cycle_phase?: string | null
+          dietary_preferences?: string[] | null
+          id?: string
+          mood?: string | null
+          portion_size?: string | null
+          region?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_or_update_meal_plan: {
+        Args: {
+          user_id_param: string
+          date_param: string
+          breakfast_id_param: string
+          lunch_id_param: string
+          dinner_id_param: string
+        }
+        Returns: string
+      }
+      generate_personalized_meal_plan: {
+        Args: { user_id_param: string; date_param?: string }
+        Returns: {
+          meal_id: string
+          title: string
+          description: string
+          nutrition_blurb: string
+          image_url: string
+          ingredients: Json
+          estimated_cost: number
+          dietary_tags: string[]
+          meal_type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
