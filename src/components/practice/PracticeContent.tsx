@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PracticeHeader from "@/components/practice/PracticeHeader";
@@ -28,6 +29,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [culturalContext, setCulturalContext] = useState("united-states"); // Default to US
+  const [regulatoryContext, setRegulatoryContext] = useState("sec-usa"); // Default to SEC
   
   const handleTranscriptUpdate = (transcript: string) => {
     setCurrentTranscript(transcript);
@@ -141,6 +143,16 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
       description: `Feedback will now be tailored to ${cultureName} communication norms.`
     });
   };
+
+  const handleRegulatoryChange = (contextId: string) => {
+    setRegulatoryContext(contextId);
+    console.log("Regulatory context updated to:", contextId);
+    
+    toast({
+      title: "Regulatory Context Updated",
+      description: `Scenarios will now reflect ${contextId.toUpperCase()} regulatory framework.`
+    });
+  };
   
   // Add debug log to check transcript visibility
   useEffect(() => {
@@ -169,6 +181,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
               initialCategory={initialCategory}
               culturalContext={culturalContext}
               onCultureChange={handleCultureChange}
+              regulatoryContext={regulatoryContext}
+              onRegulatoryChange={handleRegulatoryChange}
             />
           </div>
         </CardContent>
