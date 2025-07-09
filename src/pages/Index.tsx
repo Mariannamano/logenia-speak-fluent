@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -84,12 +85,12 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-b from-background to-fluent-50 dark:from-background dark:to-fluent-900/10">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-background to-playful-50 dark:from-background dark:to-playful-900/10">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1 space-y-6">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                  Practice languages in a <span className="text-fluent-primary">cozy</span> environment
+                  Practice languages in a <span className="text-playful-primary">cozy</span> environment
                 </h1>
 
                 <p className="text-xl text-muted-foreground animate-fade-in" style={{ animationDelay: "0.2s" }}>
@@ -97,7 +98,7 @@ const Index = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                  <Link to="/practice" className="bg-fluent-primary hover:bg-fluent-600 text-white px-4 py-2 rounded-md font-medium text-center">
+                  <Link to="/practice" className="bg-playful-primary hover:bg-playful-600 text-white px-4 py-2 rounded-md font-medium text-center">
                     Enter Practice Room
                   </Link>
                   <Link to="/resources" className="border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md font-medium text-center">
@@ -108,12 +109,12 @@ const Index = () => {
 
               <div className="flex-1 flex justify-center animate-fade-in" style={{ animationDelay: "0.4s" }}>
                 <div className="relative w-full max-w-md">
-                  <div className="absolute -top-8 -right-8 bg-fluent-accent1/20 rounded-full w-40 h-40 blur-3xl" />
-                  <div className="absolute -bottom-8 -left-8 bg-fluent-accent2/20 rounded-full w-40 h-40 blur-3xl" />
+                  <div className="absolute -top-8 -right-8 bg-playful-accent1/20 rounded-full w-40 h-40 blur-3xl" />
+                  <div className="absolute -bottom-8 -left-8 bg-playful-accent2/20 rounded-full w-40 h-40 blur-3xl" />
                   <div className="relative z-10 glass-card rounded-xl overflow-hidden p-6">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-2">
-                        <div className="bg-fluent-primary rounded-full p-1.5">
+                        <div className="bg-playful-primary rounded-full p-1.5">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="20"
@@ -137,10 +138,10 @@ const Index = () => {
                     </div>
 
                     <div className="space-y-3 mb-6">
-                      <div className="bg-fluent-50 dark:bg-fluent-900/20 rounded-lg p-3 text-sm">
+                      <div className="bg-playful-50 dark:bg-playful-900/20 rounded-lg p-3 text-sm">
                         "I would like to order a coffee and... <span className="text-red-500">um</span>... a croissant, please."
                       </div>
-                      <div className="border border-dashed border-fluent-200 dark:border-fluent-700/50 rounded-lg p-3">
+                      <div className="border border-dashed border-playful-200 dark:border-playful-700/50 rounded-lg p-3">
                         <div className="text-xs text-muted-foreground mb-1">Try saying:</div>
                         <div className="text-sm">
                           "I would like to order a coffee and a croissant, please."
@@ -148,7 +149,7 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="bg-fluent-accent2/20 rounded-lg p-3 text-sm border border-fluent-accent2/30">
+                    <div className="bg-playful-accent2/20 rounded-lg p-3 text-sm border border-playful-accent2/30">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xl">🦉</span>
                         <span className="font-medium">Professor Hoot says:</span>
@@ -165,7 +166,7 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-16 bg-white dark:bg-fluent-900/30">
+        <section className="py-16 bg-white dark:bg-playful-900/30">
           <div className="container px-4 md:px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold">How Fluent Lounge Works</h2>
@@ -176,7 +177,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-fluent-100 dark:bg-fluent-800/30 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-playful-100 dark:bg-playful-800/30 flex items-center justify-center mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -187,7 +188,7 @@ const Index = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-fluent-primary"
+                    className="text-playful-primary"
                   >
                     <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
                     <path d="M12 7c1.5 0 2.5-1.5 2.5-1.5" />
@@ -200,7 +201,7 @@ const Index = () => {
               </div>
 
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-fluent-100 dark:bg-fluent-800/30 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-playful-100 dark:bg-playful-800/30 flex items-center justify-center mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -211,7 +212,7 @@ const Index = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-fluent-primary"
+                    className="text-playful-primary"
                   >
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -225,7 +226,7 @@ const Index = () => {
               </div>
 
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-fluent-100 dark:bg-fluent-800/30 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-playful-100 dark:bg-playful-800/30 flex items-center justify-center mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -236,7 +237,7 @@ const Index = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-fluent-primary"
+                    className="text-playful-primary"
                   >
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
@@ -252,7 +253,7 @@ const Index = () => {
         </section>
 
         {/* Featured Rooms Section */}
-        <section className="py-16 bg-fluent-50 dark:bg-fluent-900/10">
+        <section className="py-16 bg-playful-50 dark:bg-playful-900/10">
           <div className="container px-4 md:px-6">
             <div className="flex justify-between items-center mb-8">
               <div>
@@ -261,7 +262,7 @@ const Index = () => {
                   Join these practice rooms to improve your speaking skills
                 </p>
               </div>
-              <Link to="/practice" className="hidden md:flex border-fluent-primary text-fluent-primary px-4 py-2 rounded-md border font-medium">
+              <Link to="/practice" className="hidden md:flex border-playful-primary text-playful-primary px-4 py-2 rounded-md border font-medium">
                 View All Rooms
               </Link>
             </div>
@@ -275,7 +276,7 @@ const Index = () => {
             </div>
 
             <div className="mt-8 text-center md:hidden">
-              <Link to="/practice" className="border-fluent-primary text-fluent-primary px-4 py-2 rounded-md border font-medium inline-block">
+              <Link to="/practice" className="border-playful-primary text-playful-primary px-4 py-2 rounded-md border font-medium inline-block">
                 View All Rooms
               </Link>
             </div>
@@ -283,7 +284,7 @@ const Index = () => {
         </section>
 
         {/* Character Guide Demo Section */}
-        <section className="py-16 bg-white dark:bg-fluent-900/30">
+        <section className="py-16 bg-white dark:bg-playful-900/30">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col lg:flex-row gap-8 items-center">
               <div className="lg:w-1/2 space-y-6">
@@ -293,7 +294,7 @@ const Index = () => {
                 </p>
                 <div className="space-y-4">
                   <div className="flex gap-3 items-start">
-                    <div className="bg-fluent-100 dark:bg-fluent-800/30 rounded-full p-2">
+                    <div className="bg-playful-100 dark:bg-playful-800/30 rounded-full p-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="18"
@@ -304,7 +305,7 @@ const Index = () => {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-fluent-primary"
+                        className="text-playful-primary"
                       >
                         <path d="M8 3v3a2 2 0 0 1-2 2H3" />
                         <path d="M21 8V5a2 2 0 0 0-2-2H8" />
@@ -323,7 +324,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="bg-fluent-100 dark:bg-fluent-800/30 rounded-full p-2">
+                    <div className="bg-playful-100 dark:bg-playful-800/30 rounded-full p-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="18"
@@ -334,7 +335,7 @@ const Index = () => {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-fluent-primary"
+                        className="text-playful-primary"
                       >
                         <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                       </svg>
@@ -345,7 +346,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="bg-fluent-100 dark:bg-fluent-800/30 rounded-full p-2">
+                    <div className="bg-playful-100 dark:bg-playful-800/30 rounded-full p-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="18"
@@ -356,7 +357,7 @@ const Index = () => {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-fluent-primary"
+                        className="text-playful-primary"
                       >
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                       </svg>
@@ -368,7 +369,7 @@ const Index = () => {
                   </div>
                 </div>
 
-                <Link to="/practice" className="bg-fluent-primary hover:bg-fluent-600 text-white px-4 py-2 rounded-md font-medium inline-block">
+                <Link to="/practice" className="bg-playful-primary hover:bg-playful-600 text-white px-4 py-2 rounded-md font-medium inline-block">
                   Start Practicing Now
                 </Link>
               </div>
@@ -385,15 +386,15 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-fluent-50 dark:bg-fluent-900/10">
+        <section className="py-16 bg-playful-50 dark:bg-playful-900/10">
           <div className="container px-4 md:px-6">
-            <div className="rounded-xl bg-gradient-to-r from-fluent-primary to-fluent-accent1 text-white p-8 md:p-12 shadow-xl">
+            <div className="rounded-xl bg-gradient-to-r from-playful-primary to-playful-accent1 text-white p-8 md:p-12 shadow-xl">
               <div className="max-w-3xl mx-auto text-center space-y-6">
                 <h2 className="text-3xl md:text-4xl font-bold">Ready to become fluent?</h2>
                 <p className="text-lg opacity-90">
                   Join our cozy learning community today and take your language skills to the next level.
                 </p>
-                <Link to="/practice" className="bg-white hover:bg-fluent-50 text-fluent-primary px-6 py-3 rounded-md font-medium inline-block">
+                <Link to="/practice" className="bg-white hover:bg-playful-50 text-playful-primary px-6 py-3 rounded-md font-medium inline-block">
                   Start Your First Lesson
                 </Link>
               </div>
