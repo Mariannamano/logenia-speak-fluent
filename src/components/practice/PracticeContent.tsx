@@ -28,8 +28,6 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [culturalContext, setCulturalContext] = useState("united-states"); // Default to US
-  const [regulatoryContext, setRegulatoryContext] = useState("sec-usa"); // Default to SEC
   
   const handleTranscriptUpdate = (transcript: string) => {
     setCurrentTranscript(transcript);
@@ -60,8 +58,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
         description: "We're processing your recording to provide feedback..."
       });
       
-      // Send recording for AI analysis with cultural context
-      const result = await analyzeRecording(audioBlob, transcript, culturalContext);
+      // Send recording for AI analysis
+      const result = await analyzeRecording(audioBlob, transcript);
       
       // Update transcript with potentially more accurate one from whisper
       if (result.transcript && result.transcript.length > 10) {
@@ -132,28 +130,6 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
     onFeedbackUpdate(feedback);
   };
   
-  const handleCultureChange = (cultureId: string) => {
-    setCulturalContext(cultureId);
-    console.log("Cultural context updated to:", cultureId);
-    
-    // Add a toast notification to confirm the cultural context change
-    const cultureName = cultureId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    toast({
-      title: "Cultural Context Updated",
-      description: `Feedback will now be tailored to ${cultureName} communication norms.`
-    });
-  };
-
-  const handleRegulatoryChange = (contextId: string) => {
-    setRegulatoryContext(contextId);
-    console.log("Regulatory context updated to:", contextId);
-    
-    toast({
-      title: "Regulatory Context Updated",
-      description: `Scenarios will now reflect ${contextId.toUpperCase()} regulatory framework.`
-    });
-  };
-  
   // Add debug log to check transcript visibility
   useEffect(() => {
     if (hasRecording) {
@@ -179,10 +155,6 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
               setEnableRealtimeCoaching={setEnableRealtimeCoaching}
               hasRecording={hasRecording}
               initialCategory={initialCategory}
-              culturalContext={culturalContext}
-              onCultureChange={handleCultureChange}
-              regulatoryContext={regulatoryContext}
-              onRegulatoryChange={handleRegulatoryChange}
             />
           </div>
         </CardContent>
@@ -199,13 +171,12 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
         />
       )}
       
-      {/* Feedback appears after recording - now passing culturalContext */}
+      {/* Feedback appears after recording */}
       {hasRecording && (
         <div id="feedback-panel-container" className="mb-8">
           <FeedbackPanel 
             analysis={speechAnalysis} 
             isLoading={isAnalyzing} 
-            culturalContext={culturalContext}
           />
         </div>
       )}

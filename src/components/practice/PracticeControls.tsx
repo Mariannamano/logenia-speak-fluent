@@ -5,10 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Mic } from "lucide-react";
 import RecordingControl from "@/components/RecordingControl";
 import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
-import { fintechCategories } from "@/data/fintechScenarios";
+import { practiceCategories } from "@/data/practiceScenarios";
 import { useToast } from "@/hooks/use-toast";
-import CulturalContextSelector from "./CulturalContextSelector";
-import RegulatoryContextSelector from "./RegulatoryContextSelector";
 
 interface FeedbackItem {
   type: "filler" | "followup";
@@ -24,10 +22,6 @@ interface PracticeControlsProps {
   setEnableRealtimeCoaching: (enabled: boolean) => void;
   hasRecording?: boolean;
   initialCategory?: string | null;
-  culturalContext: string;
-  onCultureChange: (culture: string) => void;
-  regulatoryContext: string;
-  onRegulatoryChange: (context: string) => void;
 }
 
 const PracticeControls = ({
@@ -39,10 +33,6 @@ const PracticeControls = ({
   setEnableRealtimeCoaching,
   hasRecording = false,
   initialCategory = null,
-  culturalContext,
-  onCultureChange,
-  regulatoryContext,
-  onRegulatoryChange,
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
@@ -63,22 +53,6 @@ const PracticeControls = ({
     });
   };
 
-  const handleCultureChange = (cultureId: string) => {
-    onCultureChange(cultureId);
-    toast({
-      title: "Cultural Context Updated",
-      description: `Feedback will now be tailored for ${cultureId.replace("-", " ")} communication norms.`,
-    });
-  };
-
-  const handleRegulatoryChange = (contextId: string) => {
-    onRegulatoryChange(contextId);
-    toast({
-      title: "Regulatory Context Updated", 
-      description: `Scenarios will now reflect ${contextId.toUpperCase()} regulatory framework.`,
-    });
-  };
-
   const handleRecordingComplete = (audioBlob: Blob, transcript: string) => {
     console.log("PracticeControls - Recording completed, forwarding to parent. Blob size:", audioBlob.size);
     onRecordingComplete(audioBlob, transcript);
@@ -88,24 +62,11 @@ const PracticeControls = ({
     <div className="space-y-4">
       {/* Scenario Selector */}
       <ScenarioSelector 
-        categories={fintechCategories}
+        categories={practiceCategories}
         selectedScenario={selectedScenario}
         onScenarioChange={handleScenarioChange}
         initialCategory={initialCategory}
       />
-      
-      {/* Context Selectors */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CulturalContextSelector
-          selectedCulture={culturalContext}
-          onCultureChange={handleCultureChange}
-        />
-        
-        <RegulatoryContextSelector
-          selectedContext={regulatoryContext}
-          onContextChange={handleRegulatoryChange}
-        />
-      </div>
       
       <div className="flex items-center justify-between">
         <Label htmlFor="enable-coaching" className="flex items-center gap-2 cursor-pointer text-lg">
