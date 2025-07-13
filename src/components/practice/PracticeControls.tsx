@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Mic } from "lucide-react";
 import RecordingControl from "@/components/RecordingControl";
 import ScenarioSelector, { Scenario } from "@/components/ScenarioSelector";
+import CulturalContextSelector from "@/components/practice/CulturalContextSelector";
 import { practiceCategories } from "@/data/practiceScenarios";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,6 +23,8 @@ interface PracticeControlsProps {
   setEnableRealtimeCoaching: (enabled: boolean) => void;
   hasRecording?: boolean;
   initialCategory?: string | null;
+  selectedCulture: string;
+  onCultureChange: (cultureId: string) => void;
 }
 
 const PracticeControls = ({
@@ -33,6 +36,8 @@ const PracticeControls = ({
   setEnableRealtimeCoaching,
   hasRecording = false,
   initialCategory = null,
+  selectedCulture,
+  onCultureChange,
 }: PracticeControlsProps) => {
   const { toast } = useToast();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
@@ -66,6 +71,12 @@ const PracticeControls = ({
         selectedScenario={selectedScenario}
         onScenarioChange={handleScenarioChange}
         initialCategory={initialCategory}
+      />
+      
+      {/* Cultural Context Selector */}
+      <CulturalContextSelector 
+        selectedCulture={selectedCulture}
+        onCultureChange={onCultureChange}
       />
       
       <div className="flex items-center justify-between">

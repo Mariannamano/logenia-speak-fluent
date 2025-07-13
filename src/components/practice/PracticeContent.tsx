@@ -28,6 +28,7 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | undefined>(undefined);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [selectedCulture, setSelectedCulture] = useState("american");
   
   const handleTranscriptUpdate = (transcript: string) => {
     setCurrentTranscript(transcript);
@@ -155,6 +156,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
               setEnableRealtimeCoaching={setEnableRealtimeCoaching}
               hasRecording={hasRecording}
               initialCategory={initialCategory}
+              selectedCulture={selectedCulture}
+              onCultureChange={setSelectedCulture}
             />
           </div>
         </CardContent>
