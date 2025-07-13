@@ -65,7 +65,7 @@ export function useRecording({
   } = useRecordingTimer({
     isActive: isListening,
     maxDuration,
-    onTimerComplete: handleStopRecording
+    onTimerComplete: () => handleStopRecording()
   });
 
   // Feedback hook

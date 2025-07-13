@@ -17,6 +17,7 @@ export function useAudioRecorder({
   const audioChunksRef = useRef<BlobPart[]>([]);
 
   const startRecording = async (): Promise<boolean> => {
+    console.log("Starting audio recording...");
     setIsLoading(true);
     audioChunksRef.current = [];
     
@@ -74,6 +75,7 @@ export function useAudioRecorder({
       recorder.start(500);
       setMediaRecorder(recorder);
       setIsRecording(true);
+      console.log("Audio recording started successfully");
       return true;
     } catch (error) {
       console.error("Error accessing microphone:", error);
@@ -89,10 +91,12 @@ export function useAudioRecorder({
   };
 
   const stopRecording = () => {
+    console.log("Stopping audio recording...");
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       mediaRecorder.stop();
       // Stop all audio tracks
       mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      console.log("Audio recording stopped");
     }
     
     setIsRecording(false);

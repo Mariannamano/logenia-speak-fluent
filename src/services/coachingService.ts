@@ -111,11 +111,11 @@ export async function analyzeRecording(
     // Step 1: Call the transcription function to get better transcript
     let finalTranscript = transcript;
     try {
-      const transcriptionUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/transcribe-audio";
+      const transcriptionUrl = "https://jzizfplvrpnzuucurwlw.supabase.co/functions/v1/transcribe-audio";
       console.log("Calling transcription function at:", transcriptionUrl);
       
       const transcriptionResponse = await axios.post(transcriptionUrl, {
-        audioData: audioBase64
+        audio: audioBase64.split(',')[1] // Remove data:audio/webm;base64, prefix
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -123,8 +123,8 @@ export async function analyzeRecording(
         timeout: 30000 // 30 second timeout for transcription
       });
       
-      if (transcriptionResponse.data && transcriptionResponse.data.transcript) {
-        finalTranscript = transcriptionResponse.data.transcript;
+      if (transcriptionResponse.data && transcriptionResponse.data.text) {
+        finalTranscript = transcriptionResponse.data.text;
         console.log("Got improved transcript:", finalTranscript.substring(0, 100) + "...");
       }
     } catch (transcriptionError) {
@@ -133,7 +133,7 @@ export async function analyzeRecording(
     }
     
     // Step 2: Call the feedback function with the best transcript we have and cultural context
-    const feedbackUrl = "https://jzizfplvrpnzuucurwlw.functions.supabase.co/generate-feedback";
+    const feedbackUrl = "https://jzizfplvrpnzuucurwlw.supabase.co/functions/v1/generate-feedback";
     console.log("Calling feedback function at:", feedbackUrl, "with cultural context:", culturalContext);
     
     const feedbackResponse = await axios.post(feedbackUrl, {

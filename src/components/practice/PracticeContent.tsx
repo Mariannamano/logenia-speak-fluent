@@ -59,8 +59,8 @@ const PracticeContent = ({ initialCategory, onFeedbackUpdate }: PracticeContentP
         description: "We're processing your recording to provide feedback..."
       });
       
-      // Send recording for AI analysis
-      const result = await analyzeRecording(audioBlob, transcript);
+      // Send recording for AI analysis with cultural context
+      const result = await analyzeRecording(audioBlob, transcript, selectedCulture);
       
       // Update transcript with potentially more accurate one from whisper
       if (result.transcript && result.transcript.length > 10) {
